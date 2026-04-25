@@ -666,16 +666,43 @@ php artisan pail
 
 ---
 
-## Known Limitations
+## Integrations
 
-- WhatsApp reminders run in **simulated mode** — implement real provider in `AppointmentReminderController@send`.
-- Billplz / online payment gateway not yet wired (DomPDF installed and ready for receipt PDFs but templates not built).
-- Locum Portal (separate locum login) not yet implemented — locums currently access via main staff login.
-- Power BI-style chart dashboards not yet built (Chart.js bundle not added).
-- Old Breeze Tailwind components remain in `resources/views/components/` (unused, safe to delete).
+### WhatsApp Reminders
+Production-ready. Configure under **Settings → WhatsApp Reminders**. Three providers supported:
+
+- **Meta WhatsApp Cloud API** (official) — requires Access Token + Phone Number ID
+- **Fonnte** — popular Indonesian/Malaysian provider, requires API token
+- **Wassenger** — alternative provider, requires API token
+
+If unconfigured, reminders log a simulated success (safe for development). Phone numbers auto-normalized to Malaysia country code (60).
+
+Implementation: `app/Services/WhatsAppService.php`.
+
+### Billplz Online Payments
+Production-ready. Configure under **Settings → Billplz Payment Gateway**. Required fields:
+
+- API Secret Key (from Billplz dashboard)
+- Collection ID (from your Billplz collection)
+- X-Signature Key (for callback verification)
+- Sandbox toggle (test vs production)
+
+Patient flow: invoice show page → "Pay Online" button → redirected to Billplz checkout → after payment, callback hits `/billplz/callback` (CSRF-exempt, X-Signature-verified) which auto-creates the `Payment` record and updates invoice status. Patient redirected back to invoice page.
+
+Implementation: `app/Services/BillplzService.php` + `app/Http/Controllers/BillplzController.php`.
+
+### Receipt PDF
+Generated via DomPDF. Visit any invoice → click **PDF** button. Template at `resources/views/invoices/receipt-pdf.blade.php`.
+
+### Locum Portal
+Live at `/locum-portal/login`. Locums log in with IC number + password (set by clinic admin via `LocumDoctor.password`). Sees their own dashboard with sessions, payments, outstanding balance, monthly earnings. Implementation: `LocumPortalController` + `LocumPortalAuth` middleware (separate session key from staff auth).
+
+### Charts
+Live on the main `/dashboard`. Three Chart.js charts (revenue line with gradient fill, appointment doughnut, daily appointments bar). Chart.js is bundled with the Star Admin vendor JS.
 
 ---
 
 ## License
 
 Proprietary — built for internal clinic use. Laravel framework is MIT-licensed.
+

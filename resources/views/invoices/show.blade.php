@@ -3,7 +3,14 @@
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="font-weight-bold mb-0">Invoice {{ $invoice->invoice_number }}</h4>
             <div class="d-flex gap-2">
+                <a href="{{ route('invoices.pdf', $invoice) }}" target="_blank" class="btn btn-outline-info btn-sm"><i class="mdi mdi-file-pdf-box mr-1"></i>PDF</a>
                 <a href="{{ route('invoices.print', $invoice) }}" class="btn btn-success btn-sm">Print</a>
+                @if($invoice->status !== 'paid' && $invoice->payment_type !== 'panel' && \App\Models\Setting::get('billplz_enabled') === '1')
+                    <form method="POST" action="{{ route('invoices.billplz', $invoice) }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-warning btn-sm"><i class="mdi mdi-credit-card mr-1"></i>Pay Online</button>
+                    </form>
+                @endif
                 <a href="{{ route('invoices.edit', $invoice) }}" class="btn btn-primary btn-sm">Edit</a>
             </div>
         </div>

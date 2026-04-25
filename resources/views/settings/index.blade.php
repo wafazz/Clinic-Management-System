@@ -31,6 +31,68 @@
                             @error('clinic_logo') <br><small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
+                        <hr class="my-4">
+                        <h5 class="card-title"><i class="mdi mdi-whatsapp text-success mr-1"></i>WhatsApp Reminders</h5>
+                        <p class="small text-muted">Configure WhatsApp API for sending appointment reminders.</p>
+
+                        <div class="form-check mb-2">
+                            <input type="checkbox" name="whatsapp_enabled" value="1" id="wa_en" class="form-check-input" {{ ($whatsapp_enabled ?? '0') === '1' ? 'checked' : '' }}>
+                            <label for="wa_en" class="form-check-label">Enable WhatsApp sending</label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Provider</label>
+                            <select name="whatsapp_provider" class="form-control form-control-sm">
+                                <option value="cloud_api" {{ ($whatsapp_provider ?? '') === 'cloud_api' ? 'selected' : '' }}>Meta WhatsApp Cloud API</option>
+                                <option value="fonnte" {{ ($whatsapp_provider ?? '') === 'fonnte' ? 'selected' : '' }}>Fonnte</option>
+                                <option value="wassenger" {{ ($whatsapp_provider ?? '') === 'wassenger' ? 'selected' : '' }}>Wassenger</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>API Token / Key</label>
+                            <input type="password" name="whatsapp_token" value="{{ $whatsapp_token ?? '' }}" class="form-control form-control-sm" placeholder="{{ $whatsapp_token ? '••••••••' : 'Paste token here' }}" autocomplete="off" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone Number ID <small class="text-muted">(Cloud API only)</small></label>
+                            <input type="text" name="whatsapp_phone_id" value="{{ $whatsapp_phone_id ?? '' }}" class="form-control form-control-sm" placeholder="e.g. 123456789012345" />
+                        </div>
+
+                        <hr class="my-4">
+                        <h5 class="card-title"><i class="mdi mdi-credit-card text-primary mr-1"></i>Billplz Payment Gateway</h5>
+                        <p class="small text-muted">Accept online payments for invoices via Billplz.</p>
+
+                        <div class="form-check mb-2">
+                            <input type="checkbox" name="billplz_enabled" value="1" id="bp_en" class="form-check-input" {{ ($billplz_enabled ?? '0') === '1' ? 'checked' : '' }}>
+                            <label for="bp_en" class="form-check-label">Enable Billplz</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" name="billplz_sandbox" value="1" id="bp_sb" class="form-check-input" {{ ($billplz_sandbox ?? '1') === '1' ? 'checked' : '' }}>
+                            <label for="bp_sb" class="form-check-label">Sandbox Mode (test environment)</label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>API Secret Key</label>
+                            <input type="password" name="billplz_api_key" value="{{ $billplz_api_key ?? '' }}" class="form-control form-control-sm" placeholder="{{ $billplz_api_key ? '••••••••' : 'From Billplz dashboard' }}" autocomplete="off" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Collection ID</label>
+                            <input type="text" name="billplz_collection_id" value="{{ $billplz_collection_id ?? '' }}" class="form-control form-control-sm" placeholder="e.g. abc123" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>X-Signature Key <small class="text-muted">(for callback verification)</small></label>
+                            <input type="password" name="billplz_x_signature" value="{{ $billplz_x_signature ?? '' }}" class="form-control form-control-sm" placeholder="{{ $billplz_x_signature ? '••••••••' : 'From Billplz Settings → X-Signature' }}" autocomplete="off" />
+                        </div>
+
+                        <div class="alert alert-info py-2 small">
+                            <strong>Callback URL:</strong> <code>{{ url('/billplz/callback') }}</code><br>
+                            <strong>Redirect URL:</strong> <code>{{ url('/billplz/redirect') }}</code><br>
+                            Add these in Billplz Collection settings.
+                        </div>
+
                         <button type="submit" class="btn btn-primary btn-sm">
                             <i class="mdi mdi-content-save mr-1"></i>Save Settings
                         </button>

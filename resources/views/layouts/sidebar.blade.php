@@ -273,6 +273,14 @@
         </li>
         @endif
 
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('locum-portal.login') }}" target="_blank">
+                <i class="menu-icon mdi mdi-account-tie"></i>
+                <span class="menu-title">Locum Portal</span>
+                <i class="mdi mdi-open-in-new ml-auto small"></i>
+            </a>
+        </li>
+
         <li class="nav-item {{ request()->routeIs('settings.*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('settings.index') }}">
                 <i class="menu-icon mdi mdi-settings"></i>

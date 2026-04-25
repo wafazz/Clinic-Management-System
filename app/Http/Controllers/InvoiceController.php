@@ -285,6 +285,13 @@ class InvoiceController extends Controller
         return view('invoices.print', compact('invoice'));
     }
 
+    public function pdf(Invoice $invoice)
+    {
+        $invoice->load(['patient', 'branch', 'items', 'payments', 'insurancePanel']);
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('invoices.receipt-pdf', compact('invoice'));
+        return $pdf->stream("Receipt-{$invoice->invoice_number}.pdf");
+    }
+
     public function destroy(Invoice $invoice)
     {
         $invoice->delete();

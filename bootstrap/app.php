@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'locum.auth' => \App\Http\Middleware\LocumPortalAuth::class,
+        ]);
+        $middleware->validateCsrfTokens(except: [
+            'billplz/callback',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -42,6 +42,8 @@ use App\Http\Controllers\LeadController;
 use App\Http\Controllers\RosterController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\LocumPaymentController;
+use App\Http\Controllers\LocumPortalController;
+use App\Http\Controllers\BillplzController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -100,6 +102,8 @@ Route::middleware(['auth'])->group(function () {
     // Invoices
     Route::resource('invoices', InvoiceController::class);
     Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+    Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+    Route::post('invoices/{invoice}/billplz', [BillplzController::class, 'checkout'])->name('invoices.billplz');
 
     // Payments
     Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
@@ -232,6 +236,23 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+});
+
+// Billplz callback (CSRF-exempt — no auth required)
+Route::post('billplz/callback', [BillplzController::class, 'callback'])->name('billplz.callback');
+Route::get('billplz/redirect/{invoice?}', [BillplzController::class, 'redirect'])->name('billplz.redirect');
+
+// Locum Portal (separate auth)
+Route::prefix('locum-portal')->group(function () {
+    Route::get('login', [LocumPortalController::class, 'login'])->name('locum-portal.login');
+    Route::post('login', [LocumPortalController::class, 'authenticate'])->name('locum-portal.authenticate');
+    Route::post('logout', [LocumPortalController::class, 'logout'])->name('locum-portal.logout');
+
+    Route::middleware('locum.auth')->group(function () {
+        Route::get('/', [LocumPortalController::class, 'dashboard'])->name('locum-portal.dashboard');
+        Route::get('sessions', [LocumPortalController::class, 'sessions'])->name('locum-portal.sessions');
+        Route::get('payments', [LocumPortalController::class, 'payments'])->name('locum-portal.payments');
+    });
 });
 
 // Patient Portal (separate auth)
