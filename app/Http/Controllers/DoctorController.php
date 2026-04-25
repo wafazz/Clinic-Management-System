@@ -77,7 +77,40 @@ class DoctorController extends Controller
     public function show(Doctor $doctor)
     {
         $doctor->load(['user', 'branch', 'schedules', 'appointments.patient']);
-        return view('doctors.show', compact('doctor'));
+
+        // Stats
+        $totalAppointments = $doctor->appointments->count();
+        $completedAppointments = $doctor->appointments->where('status', 'completed')->count();
+        $upcomingAppointments = $doctor->appointments
+            ->where('appointment_date', '>=', now()->toDateString())
+            ->whereNotIn('status', ['cancelled', 'no_show'])
+            ->take(5);
+        $todayAppointments = $doctor->appointments
+            ->filter(fn($a) => $a->appointment_date->isToday())
+            ->count();
+
+        $totalConsultations = \App\Models\Consultation::where('doctor_id', $doctor->id)->count();
+        $monthlyRevenue = \App\Models\Invoice::whereHas('appointment', fn($q) => $q->where('doctor_id', $doctor->id))
+            ->where('status', 'paid')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total');
+
+        // Patient count (distinct)
+        $uniquePatients = $doctor->appointments->pluck('patient_id')->unique()->count();
+
+        // Daily appointments last 14 days for sparkline
+        $dailyTrend = collect();
+        for ($i = 13; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $count = $doctor->appointments->filter(fn($a) => $a->appointment_date->isSameDay($date))->count();
+            $dailyTrend->push(['label' => $date->format('d/m'), 'count' => $count]);
+        }
+
+        return view('doctors.show', compact(
+            'doctor', 'totalAppointments', 'completedAppointments', 'upcomingAppointments',
+            'todayAppointments', 'totalConsultations', 'monthlyRevenue', 'uniquePatients', 'dailyTrend'
+        ));
     }
 
     public function edit(Doctor $doctor)
