@@ -11,6 +11,17 @@
                     @if($selectedConsultation->doctor->consultation_fee)
                         <span class="ml-2">| Consultation Fee: <strong>RM {{ number_format($selectedConsultation->doctor->consultation_fee, 2) }}</strong></span>
                     @endif
+                    @if(!empty($prefillItems) && count($prefillItems) > 1)
+                        <br><small><i class="mdi mdi-check"></i> Auto pre-filled <strong>{{ count($prefillItems) }} line items</strong> (consultation fee + dispensed Rx + lab tests)</small>
+                    @endif
+                </div>
+            @endif
+            @if(!empty($membership))
+                <div class="alert alert-success py-2">
+                    <i class="mdi mdi-card-account-details mr-1"></i>
+                    Patient is <strong>{{ $membership->tier->name }}</strong> member ({{ $membership->membership_number }}) —
+                    Discounts: Cons {{ $membership->tier->discount_consultation }}% / Med {{ $membership->tier->discount_medicine }}% / Lab {{ $membership->tier->discount_lab }}%.
+                    Tick "Apply Membership Discount" below.
                 </div>
             @endif
             <form method="POST" action="{{ route('invoices.store') }}"  x-data="invoiceForm()">
@@ -71,10 +82,20 @@
                 <h3 class="text-lg font-weight-bold border-b pb-2">Line Items</h3>
                 <template x-for="(item, index) in items" :key="index">
                     <div class="row mb-2">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <label x-show="index === 0" class="form-label">Kind</label>
+                            <select :name="'items['+index+'][kind]'" x-model="item.kind" class="form-control form-control-sm">
+                                <option value="custom">Custom</option>
+                                <option value="consultation">Consultation</option>
+                                <option value="medicine">Medicine</option>
+                                <option value="lab">Lab</option>
+                                <option value="service">Service</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
                             <label x-show="index === 0" class="form-label">Service</label>
-                            <select :name="'items['+index+'][service_id]'" x-on:change="prefillService($event, index)" class="form-control">
-                                <option value="">Custom</option>
+                            <select :name="'items['+index+'][service_id]'" x-on:change="prefillService($event, index)" class="form-control form-control-sm">
+                                <option value="">-</option>
                                 @foreach($services as $svc)
                                     <option value="{{ $svc->id }}" data-name="{{ $svc->name }}" data-price="{{ $svc->price }}">{{ $svc->name }}</option>
                                 @endforeach
@@ -82,15 +103,15 @@
                         </div>
                         <div class="col-md-3">
                             <label x-show="index === 0" class="form-label">Description *</label>
-                            <input type="text" :name="'items['+index+'][description]'" x-model="item.description" required class="form-control" />
+                            <input type="text" :name="'items['+index+'][description]'" x-model="item.description" required class="form-control form-control-sm" />
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             <label x-show="index === 0" class="form-label">Qty</label>
-                            <input type="number" :name="'items['+index+'][quantity]'" x-model.number="item.quantity" min="1" required class="form-control" @input="calcTotal" />
+                            <input type="number" :name="'items['+index+'][quantity]'" x-model.number="item.quantity" min="1" required class="form-control form-control-sm" @input="calcTotal" />
                         </div>
                         <div class="col-md-2">
                             <label x-show="index === 0" class="form-label">Price (RM)</label>
-                            <input type="number" step="0.01" :name="'items['+index+'][unit_price]'" x-model.number="item.unit_price" min="0" required class="form-control" @input="calcTotal" />
+                            <input type="number" step="0.01" :name="'items['+index+'][unit_price]'" x-model.number="item.unit_price" min="0" required class="form-control form-control-sm" @input="calcTotal" />
                         </div>
                         <div class="col-md-1 text-sm font-medium pt-4" x-text="'RM ' + (item.quantity * item.unit_price).toFixed(2)"></div>
                         <div class="col-md-1 pt-4">
@@ -109,6 +130,16 @@
                         <label class="form-label">Discount (RM)</label>
                         <input type="number" step="0.01" name="discount" x-model.number="discount" value="0" class="form-control" @input="calcTotal" />
                     </div>
+                    @if(!empty($membership))
+                    <div>
+                        <label class="form-label d-block">Membership</label>
+                        <div class="form-check mt-2">
+                            <input type="checkbox" name="apply_membership_discount" value="1" id="ams" x-model="applyMembership" class="form-check-input" @change="calcTotal" checked>
+                            <label for="ams" class="form-check-label">Apply Discount</label>
+                        </div>
+                        <small class="text-success" x-show="applyMembership && membershipDiscount > 0">- RM <span x-text="membershipDiscount.toFixed(2)"></span></small>
+                    </div>
+                    @endif
                     <div class="d-flex align-items-end">
                         <div class="h5 font-bold">Total: RM <span x-text="grandTotal.toFixed(2)">0.00</span></div>
                     </div>
@@ -128,36 +159,58 @@
     <script>
         function invoiceForm() {
             @php
-                $defaultItems = [['description' => '', 'quantity' => 1, 'unit_price' => 0]];
-                if (!empty($selectedConsultation) && $selectedConsultation->doctor && $selectedConsultation->doctor->consultation_fee > 0) {
-                    $defaultItems = [[
-                        'description' => 'Consultation - Dr. ' . $selectedConsultation->doctor->user->name,
-                        'quantity' => 1,
-                        'unit_price' => (float) $selectedConsultation->doctor->consultation_fee,
-                    ]];
+                $defaultItems = [];
+                if (!empty($prefillItems)) {
+                    foreach ($prefillItems as $i => $item) {
+                        // Determine kind from description
+                        $kind = 'custom';
+                        if (str_starts_with($item['description'], 'Consultation')) $kind = 'consultation';
+                        elseif (str_starts_with($item['description'], 'Lab:')) $kind = 'lab';
+                        elseif (!str_starts_with($item['description'], 'Consultation') && !str_starts_with($item['description'], 'Lab:')) $kind = 'medicine';
+                        $defaultItems[] = array_merge($item, ['kind' => $kind]);
+                    }
                 }
+                if (empty($defaultItems)) {
+                    $defaultItems = [['description' => '', 'quantity' => 1, 'unit_price' => 0, 'kind' => 'custom']];
+                }
+                $tierDiscounts = !empty($membership) ? [
+                    'consultation' => (float) $membership->tier->discount_consultation,
+                    'medicine' => (float) $membership->tier->discount_medicine,
+                    'lab' => (float) $membership->tier->discount_lab,
+                ] : ['consultation' => 0, 'medicine' => 0, 'lab' => 0];
             @endphp
             return {
                 items: @json($defaultItems),
                 tax: 0,
                 discount: 0,
                 grandTotal: 0,
+                applyMembership: {{ !empty($membership) ? 'true' : 'false' }},
+                membershipDiscount: 0,
+                tierRates: @json($tierDiscounts),
                 paymentType: '{{ old('payment_type', 'cash') }}',
                 patientId: '{{ old('patient_id') }}',
                 init() { this.calcTotal(); },
-                addItem() { this.items.push({ description: '', quantity: 1, unit_price: 0 }); },
+                addItem() { this.items.push({ description: '', quantity: 1, unit_price: 0, kind: 'custom' }); },
                 removeItem(index) { this.items.splice(index, 1); this.calcTotal(); },
                 prefillService(e, index) {
                     let opt = e.target.selectedOptions[0];
                     if (opt.dataset.name) {
                         this.items[index].description = opt.dataset.name;
                         this.items[index].unit_price = parseFloat(opt.dataset.price) || 0;
+                        this.items[index].kind = 'service';
                         this.calcTotal();
                     }
                 },
                 calcTotal() {
                     let sub = this.items.reduce((sum, i) => sum + (i.quantity * i.unit_price), 0);
-                    this.grandTotal = sub + (this.tax || 0) - (this.discount || 0);
+                    this.membershipDiscount = 0;
+                    if (this.applyMembership) {
+                        for (let i of this.items) {
+                            let rate = this.tierRates[i.kind] || 0;
+                            this.membershipDiscount += (i.quantity * i.unit_price) * (rate / 100);
+                        }
+                    }
+                    this.grandTotal = sub + (this.tax || 0) - (this.discount || 0) - this.membershipDiscount;
                 }
             }
         }

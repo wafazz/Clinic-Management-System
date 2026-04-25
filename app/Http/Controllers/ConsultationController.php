@@ -8,6 +8,10 @@ use App\Models\WalkInQueue;
 use App\Models\Patient;
 use App\Models\Doctor;
 use App\Models\Branch;
+use App\Models\PatientSubscription;
+use App\Models\SubscriptionUsage;
+use App\Models\PatientMembership;
+use App\Models\MembershipUsageLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -175,6 +179,47 @@ class ConsultationController extends Controller
                 $consultation->walkInQueue->update([
                     'status' => 'completed',
                     'completed_at' => now(),
+                ]);
+            }
+
+            // Auto-log subscription usage if patient has active subscription with consultation item
+            $subscription = PatientSubscription::where('patient_id', $consultation->patient_id)
+                ->where('status', 'active')
+                ->whereHas('package.items', fn($q) => $q->where('item_type', 'consultation'))
+                ->first();
+
+            if ($subscription) {
+                $packageItem = $subscription->package->items()->where('item_type', 'consultation')->first();
+                SubscriptionUsage::create([
+                    'subscription_id' => $subscription->id,
+                    'appointment_id' => $consultation->appointment_id,
+                    'consultation_id' => $consultation->id,
+                    'package_item_id' => $packageItem?->id,
+                    'item_type' => 'consultation',
+                    'description' => 'Consultation by Dr. ' . ($consultation->doctor->user->name ?? 'Doctor'),
+                    'quantity_used' => 1,
+                    'used_at' => now(),
+                    'recorded_by' => auth()->id(),
+                ]);
+                $subscription->increment('visits_used');
+            }
+
+            // Auto-log free consultation usage if patient has active membership with free consultations
+            $membership = PatientMembership::where('patient_id', $consultation->patient_id)
+                ->where('status', 'active')
+                ->with('tier')
+                ->first();
+
+            if ($membership && $membership->tier->free_consultations_per_year > 0
+                && $membership->free_consultations_used < $membership->tier->free_consultations_per_year) {
+                $membership->increment('free_consultations_used');
+                MembershipUsageLog::create([
+                    'membership_id' => $membership->id,
+                    'patient_id' => $consultation->patient_id,
+                    'usage_type' => 'free_consultation',
+                    'description' => 'Free consultation used (' . $membership->free_consultations_used . '/' . $membership->tier->free_consultations_per_year . ')',
+                    'savings_amount' => $consultation->doctor->consultation_fee ?? 0,
+                    'used_at' => now(),
                 ]);
             }
         });

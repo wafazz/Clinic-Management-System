@@ -6,7 +6,9 @@ use App\Models\InsuranceClaim;
 use App\Models\InsurancePanel;
 use App\Models\Invoice;
 use App\Models\Branch;
+use App\Models\PatientInsurance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class InsuranceClaimController extends Controller
 {
@@ -127,7 +129,19 @@ class InsuranceClaimController extends Controller
             $data['notes'] = $request->notes;
         }
 
-        $insuranceClaim->update($data);
+        DB::transaction(function () use ($insuranceClaim, $data, $request) {
+            $insuranceClaim->update($data);
+
+            // Auto-deduct annual limit when insurer pays the claim
+            if ($request->status === 'paid' && $insuranceClaim->patient_insurance_id) {
+                $paidAmount = (float) ($insuranceClaim->approved_amount ?? $insuranceClaim->claim_amount);
+                $patientInsurance = PatientInsurance::find($insuranceClaim->patient_insurance_id);
+                if ($patientInsurance && $patientInsurance->remaining_limit !== null) {
+                    $newLimit = max(0, (float) $patientInsurance->remaining_limit - $paidAmount);
+                    $patientInsurance->update(['remaining_limit' => $newLimit]);
+                }
+            }
+        });
 
         return back()->with('success', 'Claim status updated to ' . ucfirst($request->status) . '.');
     }

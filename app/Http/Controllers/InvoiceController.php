@@ -11,6 +11,8 @@ use App\Models\Service;
 use App\Models\Branch;
 use App\Models\InsurancePanel;
 use App\Models\PatientInsurance;
+use App\Models\PatientMembership;
+use App\Models\MembershipUsageLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -50,16 +52,62 @@ class InvoiceController extends Controller
         $selectedAppointment = $request->appointment_id;
         $selectedConsultation = null;
         $selectedPatient = null;
+        $prefillItems = [];
+        $membership = null;
         if ($request->filled('consultation_id')) {
-            $selectedConsultation = Consultation::with('patient', 'doctor.user')->find($request->consultation_id);
+            $selectedConsultation = Consultation::with([
+                'patient', 'doctor.user',
+                'prescriptions.items.medicine',
+                'labReports.items.test',
+            ])->find($request->consultation_id);
+
             if ($selectedConsultation) {
                 $selectedPatient = $selectedConsultation->patient_id;
                 if (!$selectedAppointment && $selectedConsultation->appointment_id) {
                     $selectedAppointment = $selectedConsultation->appointment_id;
                 }
+
+                // Consultation fee (skip if free under membership)
+                $membership = PatientMembership::where('patient_id', $selectedConsultation->patient_id)
+                    ->where('status', 'active')
+                    ->with('tier')
+                    ->first();
+
+                $consultationFee = (float) ($selectedConsultation->doctor->consultation_fee ?? 0);
+                if ($consultationFee > 0) {
+                    $prefillItems[] = [
+                        'description' => 'Consultation - Dr. ' . $selectedConsultation->doctor->user->name,
+                        'quantity' => 1,
+                        'unit_price' => $consultationFee,
+                    ];
+                }
+
+                // Dispensed medicines from prescriptions
+                foreach ($selectedConsultation->prescriptions as $rx) {
+                    if ($rx->status !== 'dispensed') continue;
+                    foreach ($rx->items as $item) {
+                        $prefillItems[] = [
+                            'description' => $item->medicine->name . ' (' . $item->dosage . ' / ' . $item->frequency . ' / ' . $item->duration . ')',
+                            'quantity' => $item->quantity,
+                            'unit_price' => (float) ($item->medicine->selling_price ?? 0),
+                        ];
+                    }
+                }
+
+                // Lab tests from completed reports
+                foreach ($selectedConsultation->labReports as $lab) {
+                    foreach ($lab->items as $item) {
+                        if (!$item->test) continue;
+                        $prefillItems[] = [
+                            'description' => 'Lab: ' . $item->test->name,
+                            'quantity' => 1,
+                            'unit_price' => (float) ($item->test->price ?? 0),
+                        ];
+                    }
+                }
             }
         }
-        return view('invoices.create', compact('patients', 'services', 'appointments', 'selectedAppointment', 'selectedConsultation', 'selectedPatient', 'insurancePanels', 'patientInsurances'));
+        return view('invoices.create', compact('patients', 'services', 'appointments', 'selectedAppointment', 'selectedConsultation', 'selectedPatient', 'prefillItems', 'membership', 'insurancePanels', 'patientInsurances'));
     }
 
     public function store(Request $request)
@@ -73,18 +121,22 @@ class InvoiceController extends Controller
             'patient_insurance_id' => 'nullable|exists:patient_insurances,id',
             'tax' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
+            'apply_membership_discount' => 'nullable|boolean',
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.service_id' => 'nullable|exists:services,id',
             'items.*.description' => 'required|string',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.kind' => 'nullable|in:consultation,medicine,lab,service,custom',
         ]);
 
         $patient = Patient::findOrFail($validated['patient_id']);
         $branch = $patient->branch;
 
-        DB::transaction(function () use ($validated, $branch, $patient) {
+        $applyMembership = $request->boolean('apply_membership_discount');
+
+        DB::transaction(function () use ($validated, $branch, $patient, $applyMembership, $request) {
             $subtotal = 0;
             foreach ($validated['items'] as $item) {
                 $subtotal += $item['quantity'] * $item['unit_price'];
@@ -92,7 +144,34 @@ class InvoiceController extends Controller
 
             $tax = $validated['tax'] ?? 0;
             $discount = $validated['discount'] ?? 0;
-            $total = $subtotal + $tax - $discount;
+
+            // Apply membership tier discount automatically
+            $membershipDiscount = 0;
+            $membership = null;
+            if ($applyMembership) {
+                $membership = PatientMembership::where('patient_id', $patient->id)
+                    ->where('status', 'active')
+                    ->with('tier')
+                    ->first();
+
+                if ($membership && $membership->tier) {
+                    $tier = $membership->tier;
+                    foreach ($validated['items'] as $item) {
+                        $kind = $item['kind'] ?? 'custom';
+                        $lineTotal = $item['quantity'] * $item['unit_price'];
+                        $rate = match ($kind) {
+                            'consultation' => (float) $tier->discount_consultation,
+                            'medicine' => (float) $tier->discount_medicine,
+                            'lab' => (float) $tier->discount_lab,
+                            default => 0,
+                        };
+                        $membershipDiscount += $lineTotal * ($rate / 100);
+                    }
+                }
+            }
+
+            $totalDiscount = $discount + $membershipDiscount;
+            $total = $subtotal + $tax - $totalDiscount;
 
             $invoice = Invoice::create([
                 'branch_id' => $branch->id,
@@ -105,7 +184,7 @@ class InvoiceController extends Controller
                 'patient_insurance_id' => ($validated['payment_type'] ?? 'cash') === 'panel' ? ($validated['patient_insurance_id'] ?? null) : null,
                 'subtotal' => $subtotal,
                 'tax' => $tax,
-                'discount' => $discount,
+                'discount' => $totalDiscount,
                 'total' => $total,
                 'status' => 'issued',
                 'notes' => $validated['notes'] ?? null,
@@ -120,6 +199,20 @@ class InvoiceController extends Controller
                     'unit_price' => $item['unit_price'],
                     'total' => $item['quantity'] * $item['unit_price'],
                 ]);
+            }
+
+            // Log membership usage
+            if ($membership && $membershipDiscount > 0) {
+                MembershipUsageLog::create([
+                    'membership_id' => $membership->id,
+                    'patient_id' => $patient->id,
+                    'usage_type' => 'discount_applied',
+                    'description' => $membership->tier->name . ' discount on invoice ' . $invoice->invoice_number,
+                    'savings_amount' => $membershipDiscount,
+                    'invoice_id' => $invoice->id,
+                    'used_at' => now(),
+                ]);
+                $membership->increment('total_savings', $membershipDiscount);
             }
         });
 

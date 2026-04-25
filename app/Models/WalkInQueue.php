@@ -9,7 +9,7 @@ class WalkInQueue extends Model
     protected $fillable = [
         'branch_id', 'patient_id', 'doctor_id', 'appointment_id',
         'queue_number', 'type', 'patient_name', 'patient_phone',
-        'queue_date', 'reason', 'status', 'position',
+        'queue_date', 'reason', 'status', 'position', 'is_priority',
         'called_at', 'completed_at',
     ];
 
@@ -19,6 +19,7 @@ class WalkInQueue extends Model
             'queue_date' => 'date',
             'called_at' => 'datetime',
             'completed_at' => 'datetime',
+            'is_priority' => 'boolean',
         ];
     }
 

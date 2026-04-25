@@ -6,6 +6,7 @@ use App\Models\WalkInQueue;
 use App\Models\Patient;
 use App\Models\Doctor;
 use App\Models\Appointment;
+use App\Models\PatientMembership;
 use Illuminate\Http\Request;
 
 class WalkInQueueController extends Controller
@@ -20,6 +21,7 @@ class WalkInQueueController extends Controller
             ->whereDate('queue_date', $date)
             ->when($request->status, fn($q, $status) => $q->where('status', $status))
             ->orderByRaw("FIELD(status, 'serving', 'waiting', 'completed', 'skipped', 'cancelled')")
+            ->orderByDesc('is_priority')
             ->orderBy('position', 'asc')
             ->get();
 
@@ -66,6 +68,7 @@ class WalkInQueueController extends Controller
         $today = now()->toDateString();
         $position = WalkInQueue::getNextPosition($branchId, $today);
         $queueNumber = WalkInQueue::generateQueueNumber($branchId, $today);
+        $isPriority = $this->isPatientPriority($validated['patient_id']);
 
         WalkInQueue::create([
             'branch_id' => $branchId,
@@ -78,9 +81,22 @@ class WalkInQueueController extends Controller
             'reason' => $validated['reason'],
             'status' => 'waiting',
             'position' => $position,
+            'is_priority' => $isPriority,
         ]);
 
-        return redirect()->route('walk-in-queue.index')->with('success', "Patient added to queue. Nombor Giliran: {$queueNumber}");
+        $msg = "Patient added to queue. Nombor Giliran: {$queueNumber}";
+        if ($isPriority) $msg .= ' (Priority)';
+
+        return redirect()->route('walk-in-queue.index')->with('success', $msg);
+    }
+
+    private function isPatientPriority($patientId): bool
+    {
+        if (!$patientId) return false;
+        return PatientMembership::where('patient_id', $patientId)
+            ->where('status', 'active')
+            ->whereHas('tier', fn($q) => $q->where('priority_queue', true))
+            ->exists();
     }
 
     public function updateStatus(Request $request, WalkInQueue $walkInQueue)
@@ -145,6 +161,7 @@ class WalkInQueueController extends Controller
             'reason' => $appointment->reason,
             'status' => 'waiting',
             'position' => $position,
+            'is_priority' => $this->isPatientPriority($appointment->patient_id),
         ]);
 
         // Update appointment to confirmed
@@ -163,6 +180,7 @@ class WalkInQueueController extends Controller
         $next = WalkInQueue::where('branch_id', $branchId)
             ->whereDate('queue_date', $today)
             ->where('status', 'waiting')
+            ->orderByDesc('is_priority')
             ->orderBy('position', 'asc')
             ->first();
 

@@ -252,8 +252,8 @@ clinic-app/
                                     ▼
                     ┌──────────────────────────────┐
                     │  Queue Display (TV)          │  ◄── Patient sees number
-                    │  /walk-in-queue/display      │       (priority queue if
-                    └──────────────┬───────────────┘        membership tier flagged)
+                    │  /walk-in-queue/display      │       (priority members shown
+                    └──────────────┬───────────────┘        with red star, called first)
                                    │
                                    ▼
                     ┌──────────────────────────────┐
@@ -346,10 +346,10 @@ clinic-app/
   │  {id}/dispense     │      (deducts stock      │  consultation_id={id}  │     Receptionist
   │  draft → dispensed │       from medicine)     │  Auto pre-fills:       │
   └────────┬───────────┘                          │   • Consultation fee   │
-           │                                      │   • Medicine items     │
+           │                                      │   • Dispensed Rx items │
            ▼                                      │   • Lab tests          │
-  ┌────────────────────┐                          │  Apply membership      │
-  │  Stock Movement    │  ◄── System auto-logs    │  discount %            │
+  ┌────────────────────┐                          │  Membership banner +   │
+  │  Stock Movement    │  ◄── System auto-logs    │  auto-discount toggle  │
   │  Auto-deduct       │      (audit trail)       └──────────┬─────────────┘
   └────────────────────┘                                     │
                                                              ▼

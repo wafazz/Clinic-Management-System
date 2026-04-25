@@ -140,6 +140,9 @@
                         <tr class="{{ $queue->status === 'serving' ? 'table-info' : ($queue->status === 'completed' ? 'table-success' : ($queue->status === 'skipped' ? 'table-secondary' : '')) }}">
                             <td>
                                 <span class="font-weight-bold" style="font-size:1.1em">{{ $queue->queue_number }}</span>
+                                @if($queue->is_priority)
+                                    <span class="badge badge-danger" style="font-size:0.7em" title="Priority Member"><i class="mdi mdi-star"></i> Priority</span>
+                                @endif
                                 <br>
                                 @if($queue->type === 'appointment')
                                     <span class="badge badge-primary" style="font-size:0.7em">Appointment</span>
