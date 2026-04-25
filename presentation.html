@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Journey — Clinic Management System</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap">
+
+    <style>
+        :root {
+            --c-bg: #f7fafc;
+            --c-text: #1a202c;
+            --c-muted: #64748b;
+            --c-primary: #0ea5e9;
+            --c-phase1: #8b5cf6; /* Sales — purple */
+            --c-phase2: #06b6d4; /* Reception — cyan */
+            --c-phase3: #10b981; /* Clinical — green */
+            --c-phase4: #f59e0b; /* Billing — amber */
+            --c-phase5: #ef4444; /* Close-out — red */
+            --c-back: #475569;   /* Back-office — slate */
+        }
+
+        .reveal {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 26px;
+            color: var(--c-text);
+        }
+        .reveal .slides { text-align: left; }
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            color: var(--c-text);
+            text-transform: none;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5em;
+        }
+        .reveal h1 { font-size: 2.4em; }
+        .reveal h2 { font-size: 1.6em; }
+        .reveal h3 { font-size: 1.2em; }
+        .reveal p, .reveal li { line-height: 1.5; }
+
+        .reveal section { padding: 20px; }
+
+        /* Title slide */
+        .title-slide {
+            text-align: center !important;
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #10b981 100%);
+            color: #fff;
+            padding: 60px !important;
+            border-radius: 16px;
+        }
+        .title-slide h1 { color: #fff; font-size: 3em; margin-bottom: 0.2em; }
+        .title-slide .subtitle { font-size: 1.2em; opacity: 0.95; margin-bottom: 1em; }
+        .title-slide .meta { font-size: 0.7em; opacity: 0.85; }
+
+        /* Phase headers */
+        .phase {
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.7em;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+        .phase-1 { background: var(--c-phase1); }
+        .phase-2 { background: var(--c-phase2); }
+        .phase-3 { background: var(--c-phase3); }
+        .phase-4 { background: var(--c-phase4); }
+        .phase-5 { background: var(--c-phase5); }
+        .phase-back { background: var(--c-back); }
+
+        /* Cards / step boxes */
+        .step-grid {
+            display: grid;
+            gap: 18px;
+            margin-top: 12px;
+        }
+        .step-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+        .step-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .step-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+        .step {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid var(--c-primary);
+            border-radius: 10px;
+            padding: 14px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .step-1 { border-left-color: var(--c-phase1); }
+        .step-2 { border-left-color: var(--c-phase2); }
+        .step-3 { border-left-color: var(--c-phase3); }
+        .step-4 { border-left-color: var(--c-phase4); }
+        .step-5 { border-left-color: var(--c-phase5); }
+        .step-back { border-left-color: var(--c-back); }
+
+        .step h4 {
+            margin: 0 0 6px 0;
+            font-size: 0.9em;
+            color: var(--c-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .step .role {
+            display: inline-block;
+            font-size: 0.65em;
+            background: #f1f5f9;
+            color: var(--c-muted);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .step .url {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65em;
+            color: var(--c-primary);
+            background: #eff6ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .step ul {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 0 0;
+        }
+        .step ul li {
+            font-size: 0.75em;
+            color: var(--c-muted);
+            padding: 2px 0;
+        }
+        .step ul li::before {
+            content: '•';
+            color: var(--c-primary);
+            margin-right: 6px;
+        }
+
+        /* Person / role badges */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.7em;
+            font-weight: 600;
+            background: #f1f5f9;
+            color: var(--c-text);
+            margin-right: 6px;
+        }
+        .role-badge i { font-size: 1em; }
+        .role-sales { background: #ede9fe; color: #6d28d9; }
+        .role-reception { background: #cffafe; color: #0891b2; }
+        .role-doctor { background: #d1fae5; color: #047857; }
+        .role-nurse { background: #fef3c7; color: #b45309; }
+        .role-pharmacist { background: #fed7aa; color: #c2410c; }
+        .role-cashier { background: #fef3c7; color: #92400e; }
+        .role-admin { background: #fecaca; color: #b91c1c; }
+        .role-patient { background: #e0e7ff; color: #4338ca; }
+        .role-system { background: #e2e8f0; color: #475569; }
+
+        /* Arrow between steps */
+        .flow-arrow {
+            text-align: center;
+            font-size: 1.5em;
+            color: var(--c-muted);
+            margin: 4px 0;
+        }
+
+        /* Tables */
+        .reveal table {
+            margin: 0;
+            font-size: 0.55em;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .reveal table th {
+            background: #f1f5f9;
+            color: var(--c-text);
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .reveal table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .reveal table tr:hover { background: #f8fafc; }
+        .reveal table code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #eff6ff;
+            color: var(--c-primary);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.85em;
+        }
+
+        /* Stat / metric tiles */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 14px;
+        }
+        .stat {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+        .stat .num {
+            font-size: 2em;
+            font-weight: 800;
+            color: var(--c-primary);
+            line-height: 1;
+        }
+        .stat .label {
+            font-size: 0.65em;
+            color: var(--c-muted);
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Highlight callout */
+        .callout {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            margin-top: 12px;
+        }
+        .callout.info { background: #e0f2fe; border-left-color: #0ea5e9; }
+        .callout.success { background: #d1fae5; border-left-color: #10b981; }
+
+        /* Phase overview circles */
+        .phase-circle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        .phase-circle::before {
+            content: '';
+            position: absolute;
+            top: 35px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--c-phase1), var(--c-phase2), var(--c-phase3), var(--c-phase4), var(--c-phase5));
+            z-index: 0;
+        }
+        .phase-circle .pc {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            flex: 1;
+        }
+        .phase-circle .pc .circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #fff;
+            border: 4px solid;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6em;
+            color: #fff;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        .phase-circle .pc.p1 .circle { background: var(--c-phase1); border-color: var(--c-phase1); }
+        .phase-circle .pc.p2 .circle { background: var(--c-phase2); border-color: var(--c-phase2); }
+        .phase-circle .pc.p3 .circle { background: var(--c-phase3); border-color: var(--c-phase3); }
+        .phase-circle .pc.p4 .circle { background: var(--c-phase4); border-color: var(--c-phase4); }
+        .phase-circle .pc.p5 .circle { background: var(--c-phase5); border-color: var(--c-phase5); }
+        .phase-circle .pc .name { font-weight: 700; font-size: 0.85em; }
+        .phase-circle .pc .who { font-size: 0.65em; color: var(--c-muted); margin-top: 2px; }
+
+        /* Flow connector for branching */
+        .branch-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+        .branch-row .step { font-size: 0.85em; }
+
+        /* Slide footer */
+        .reveal .slide-number {
+            background: rgba(0,0,0,0.6);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65em;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        /* Specific slide adjustments */
+        .small { font-size: 0.7em; color: var(--c-muted); }
+        .big-num { font-size: 4em; font-weight: 800; color: var(--c-primary); line-height: 1; }
+        .center { text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="reveal">
+    <div class="slides">
+
+        <!-- Slide 1: Title -->
+        <section>
+            <div class="title-slide">
+                <h1><i class="mdi mdi-hospital-building"></i> Patient Journey</h1>
+                <p class="subtitle">End-to-End Flow — Clinic Management System</p>
+                <p class="meta">From Lead Capture to Completed Visit · Role-by-Role Walkthrough</p>
+                <p class="meta" style="margin-top: 30px;">
+                    <i class="mdi mdi-laravel"></i> Laravel 12 ·
+                    <i class="mdi mdi-bootstrap"></i> Star Admin ·
+                    <i class="mdi mdi-database"></i> MySQL
+                </p>
+            </div>
+            <p class="small center" style="margin-top: 30px;">Press <strong>→</strong> or <strong>Space</strong> to advance · <strong>Esc</strong> for overview</p>
+        </section>
+
+        <!-- Slide 2: Overview -->
+        <section>
+            <h2><i class="mdi mdi-map"></i> The 5 Phases</h2>
+            <p class="small">Every patient visit moves through these stages. Each phase has a primary owner.</p>
+
+            <div class="phase-circle">
+                <div class="pc p1"><div class="circle">1</div><div class="name">LEAD</div><div class="who">Sales</div></div>
+                <div class="pc p2"><div class="circle">2</div><div class="name">ARRIVAL</div><div class="who">Reception</div></div>
+                <div class="pc p3"><div class="circle">3</div><div class="name">CLINICAL</div><div class="who">Nurse + Doctor</div></div>
+                <div class="pc p4"><div class="circle">4</div><div class="name">BILLING</div><div class="who">Pharmacist + Cashier</div></div>
+                <div class="pc p5"><div class="circle">5</div><div class="name">CLOSE-OUT</div><div class="who">System</div></div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat"><div class="num">9</div><div class="label">Roles</div></div>
+                <div class="stat"><div class="num">56</div><div class="label">Models</div></div>
+                <div class="stat"><div class="num">36+</div><div class="label">Controllers</div></div>
+                <div class="stat"><div class="num">130+</div><div class="label">Views</div></div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Roles glossary -->
+        <section>
+            <h2><i class="mdi mdi-account-group"></i> Who's Involved</h2>
+            <div class="step-grid cols-3">
+                <div class="step step-1"><h4><i class="mdi mdi-bullhorn"></i> Sales Team</h4><p class="small">Captures leads, follows up, converts</p></div>
+                <div class="step step-2"><h4><i class="mdi mdi-account-clock"></i> Receptionist</h4><p class="small">Registers, queues, checks in patients</p></div>
+                <div class="step step-3"><h4><i class="mdi mdi-medical-bag"></i> Nurse</h4><p class="small">Captures vitals (BP, pulse, temp, BMI)</p></div>
+                <div class="step step-3"><h4><i class="mdi mdi-stethoscope"></i> Doctor</h4><p class="small">Consultation, diagnosis, Rx, lab, MC</p></div>
+                <div class="step step-4"><h4><i class="mdi mdi-pill"></i> Pharmacist</h4><p class="small">Dispenses Rx, manages stock</p></div>
+                <div class="step step-4"><h4><i class="mdi mdi-cash-register"></i> Cashier</h4><p class="small">Creates invoice, takes payment</p></div>
+                <div class="step step-5"><h4><i class="mdi mdi-shield-account"></i> Admin</h4><p class="small">Manages claims, payroll, reports</p></div>
+                <div class="step step-5"><h4><i class="mdi mdi-account"></i> Patient</h4><p class="small">Self-service via Patient Portal</p></div>
+                <div class="step step-back"><h4><i class="mdi mdi-cog"></i> System</h4><p class="small">Audit logs, notifications, automation</p></div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Phase 1 - Lead Capture -->
+        <section>
+            <span class="phase phase-1">PHASE 1 · LEAD CAPTURE</span>
+            <h2>Bringing Prospects In</h2>
+            <span class="role-badge role-sales"><i class="mdi mdi-bullhorn"></i> Sales Team</span>
+
+            <div class="step-grid cols-3" style="margin-top: 24px;">
+                <div class="step step-1">
+                    <h4><i class="mdi mdi-plus-circle"></i> 1. Capture</h4>
+                    <span class="url">/leads/create</span>
+                    <ul>
+                        <li>Source: FB, walk-in, phone, referral</li>
+                        <li>Name, phone, IC, gender</li>
+                        <li>Service interest</li>
+                        <li>Assign to sales rep</li>
+                    </ul>
+                </div>
+                <div class="step step-1">
+                    <h4><i class="mdi mdi-phone-in-talk"></i> 2. Follow-up</h4>
+                    <span class="url">/leads/{id}</span>
+                    <ul>
+                        <li><strong>15 status options:</strong></li>
+                        <li>new → contacted</li>
+                        <li>followup_1..5</li>
+                        <li>appointment_booked / kiv / reject</li>
+                        <li>next_followup_at scheduled</li>
+                    </ul>
+                </div>
+                <div class="step step-1">
+                    <h4><i class="mdi mdi-account-plus"></i> 3. Convert</h4>
+                    <span class="url">/leads/{id}/convert</span>
+                    <ul>
+                        <li>Auto-creates patient record</li>
+                        <li>Inherits IC, gender, DOB</li>
+                        <li>Generates patient_id (HQ-P00001)</li>
+                        <li>Lead marked as <strong>success</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout info" style="margin-top: 20px;">
+                <strong>📊 Stats Dashboard:</strong> Total leads · New · Follow-up · Converted — visible at <code>/leads</code>
+            </div>
+        </section>
+
+        <!-- Slide 5: Phase 2 - Arrival -->
+        <section>
+            <span class="phase phase-2">PHASE 2 · ARRIVAL</span>
+            <h2>Patient Walks Through The Door</h2>
+            <span class="role-badge role-reception"><i class="mdi mdi-account-clock"></i> Receptionist</span>
+
+            <div class="step-grid cols-2" style="margin-top: 24px;">
+                <div class="step step-2">
+                    <h4><i class="mdi mdi-walk"></i> Walk-In Path</h4>
+                    <span class="url">/walk-in-queue/create</span>
+                    <ul>
+                        <li>Existing patient: select from list</li>
+                        <li>New: register first, then queue</li>
+                        <li>Number format: <code>W001</code></li>
+                        <li>Auto-priority if member with priority tier</li>
+                    </ul>
+                </div>
+                <div class="step step-2">
+                    <h4><i class="mdi mdi-calendar-check"></i> Appointment Path</h4>
+                    <span class="url">/walk-in-queue/check-in/{appt}</span>
+                    <ul>
+                        <li>Patient booked online or phoned ahead</li>
+                        <li>Check-in by appointment ID</li>
+                        <li>Number format: <code>A001</code></li>
+                        <li>Appointment status: confirmed → in-progress</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step step-2" style="margin-top: 16px;">
+                <h4><i class="mdi mdi-monitor"></i> Queue Display + Call Next</h4>
+                <span class="url">/walk-in-queue/display</span> · TV display in waiting area
+                <ul>
+                    <li>Shows current serving + waiting list</li>
+                    <li><strong>⭐ Priority members</strong> bumped to front (red star badge)</li>
+                    <li>Receptionist or Doctor presses <strong>Call Next</strong> → status: waiting → serving</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 6: Phase 3 - Vitals + Consultation Start -->
+        <section>
+            <span class="phase phase-3">PHASE 3 · CLINICAL ENCOUNTER (1/3)</span>
+            <h2>Vitals → Consultation Start</h2>
+            <span class="role-badge role-nurse"><i class="mdi mdi-medical-bag"></i> Nurse</span>
+            <span class="role-badge role-doctor"><i class="mdi mdi-stethoscope"></i> Doctor</span>
+
+            <div class="step-grid cols-2" style="margin-top: 20px;">
+                <div class="step step-3">
+                    <h4><i class="mdi mdi-heart-pulse"></i> Vitals (Nurse)</h4>
+                    <span class="url">/consultations/{id}/edit</span>
+                    <ul>
+                        <li>Blood Pressure (mmHg)</li>
+                        <li>Pulse (bpm)</li>
+                        <li>Temperature (°C)</li>
+                        <li>Weight + Height → <strong>BMI auto-calculated</strong></li>
+                        <li>SpO2 (%) · Respiratory Rate</li>
+                    </ul>
+                </div>
+                <div class="step step-3">
+                    <h4><i class="mdi mdi-clipboard-text"></i> Clinical Notes (Doctor)</h4>
+                    <span class="url">/consultations/start</span>
+                    <ul>
+                        <li>Chief complaint</li>
+                        <li>History of present illness</li>
+                        <li>Physical examination</li>
+                        <li>Diagnosis (primary + secondary)</li>
+                        <li>Treatment plan + Follow-up date</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout success" style="margin-top: 16px;">
+                <strong>Consultation Number:</strong> <code>CN-{branch}-{YYYYMMDD}-{seq}</code> · e.g. <code>CN-HQ-20260425-0001</code>
+            </div>
+        </section>
+
+        <!-- Slide 7: Phase 3 - Branches -->
+        <section>
+            <span class="phase phase-3">PHASE 3 · CLINICAL ENCOUNTER (2/3)</span>
+            <h2>Three Standard Outputs</h2>
+            <p class="small">Doctor can issue any combination of these during the consultation.</p>
+
+            <div class="branch-row">
+                <div class="step step-3">
+                    <h4><i class="mdi mdi-pill"></i> Prescription</h4>
+                    <span class="role-badge role-doctor">Doctor</span>
+                    <span class="url">/prescriptions/create</span>
+                    <ul>
+                        <li>Multi-item</li>
+                        <li>Dosage / frequency / duration</li>
+                        <li>Quantity + special instructions</li>
+                        <li>Status: <code>draft</code> → <code>dispensed</code></li>
+                    </ul>
+                </div>
+                <div class="step step-3">
+                    <h4><i class="mdi mdi-flask"></i> Lab Order</h4>
+                    <span class="role-badge role-doctor">Doctor → Tech</span>
+                    <span class="url">/lab-reports/create</span>
+                    <ul>
+                        <li>Pick from test catalog</li>
+                        <li>Lab tech enters results</li>
+                        <li>Marks abnormal flags</li>
+                        <li>Doctor reviews + finalizes</li>
+                    </ul>
+                </div>
+                <div class="step step-3">
+                    <h4><i class="mdi mdi-file-document"></i> Medical Cert</h4>
+                    <span class="role-badge role-doctor">Doctor</span>
+                    <span class="url">/consultations/{id}/mc-print</span>
+                    <ul>
+                        <li>Inline on consultation form</li>
+                        <li>Days from-to (auto count)</li>
+                        <li>Reason</li>
+                        <li>Printable certificate</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Phase 3 - Optional Extensions -->
+        <section>
+            <span class="phase phase-3">PHASE 3 · CLINICAL ENCOUNTER (3/3)</span>
+            <h2>Optional Extensions</h2>
+
+            <div class="branch-row">
+                <div class="step step-3">
+                    <h4><i class="mdi mdi-clipboard-list"></i> Treatment Plan</h4>
+                    <span class="role-badge role-doctor">Doctor</span>
+                    <span class="url">/treatment-plans/create</span>
+                    <ul>
+                        <li>Multi-session plan</li>
+                        <li>Auto-generates sessions × interval days</li>
+                        <li>Mark each session complete</li>
+                        <li>Auto-completes when all done</li>
+                    </ul>
+                </div>
+                <div class="step step-3">
+                    <h4><i class="mdi mdi-share"></i> Referral</h4>
+                    <span class="role-badge role-doctor">Doctor</span>
+                    <span class="url">/referrals/create</span>
+                    <ul>
+                        <li>To external specialist / hospital</li>
+                        <li>Urgency: routine / urgent / emergency</li>
+                        <li>Clinical summary + reason</li>
+                        <li>Status: pending → sent → completed</li>
+                    </ul>
+                </div>
+                <div class="step step-3">
+                    <h4><i class="mdi mdi-package-variant"></i> Subscription Usage</h4>
+                    <span class="role-badge role-system">System (auto)</span>
+                    <span class="url">SubscriptionUsage</span>
+                    <ul>
+                        <li>If patient has active subscription</li>
+                        <li>+1 visit logged automatically on complete</li>
+                        <li>Free consultation tracked vs membership</li>
+                        <li>Savings logged to MembershipUsageLog</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout success" style="margin-top: 16px;">
+                <strong>✓ Complete & Bill</strong> — Doctor clicks once, system: marks consultation complete · syncs queue + appointment · auto-redirects to invoice creation
+            </div>
+        </section>
+
+        <!-- Slide 9: Phase 4 - Dispensing & Invoice -->
+        <section>
+            <span class="phase phase-4">PHASE 4 · DISPENSING & BILLING (1/2)</span>
+            <h2>Dispense + Invoice</h2>
+            <span class="role-badge role-pharmacist"><i class="mdi mdi-pill"></i> Pharmacist</span>
+            <span class="role-badge role-cashier"><i class="mdi mdi-cash-register"></i> Cashier</span>
+
+            <div class="step-grid cols-2" style="margin-top: 20px;">
+                <div class="step step-4">
+                    <h4><i class="mdi mdi-pill-multiple"></i> Dispensing</h4>
+                    <span class="url">/prescriptions/{id}/dispense</span>
+                    <ul>
+                        <li>Pharmacist clicks <strong>Dispense</strong></li>
+                        <li>Stock auto-deducted per item</li>
+                        <li>StockMovement audit row written</li>
+                        <li>Rx status: draft → dispensed</li>
+                        <li>Low-stock notification fires if threshold hit</li>
+                    </ul>
+                </div>
+                <div class="step step-4">
+                    <h4><i class="mdi mdi-receipt"></i> Invoice Creation</h4>
+                    <span class="url">/invoices/create?consultation_id={id}</span>
+                    <ul>
+                        <li><strong>Auto pre-fills:</strong></li>
+                        <li>· Consultation fee</li>
+                        <li>· Dispensed Rx items</li>
+                        <li>· Lab tests</li>
+                        <li>Membership banner + auto-discount toggle</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout info" style="margin-top: 16px;">
+                <strong>💳 Membership Discount</strong> — Tier discounts (consultation/medicine/lab %) applied per line item. Logged to <code>membership_usage_logs</code>. Patient's total savings tracked.
+            </div>
+        </section>
+
+        <!-- Slide 10: Phase 4 - Payment -->
+        <section>
+            <span class="phase phase-4">PHASE 4 · DISPENSING & BILLING (2/2)</span>
+            <h2>Payment Path</h2>
+
+            <div class="step-grid cols-2" style="margin-top: 20px;">
+                <div class="step step-4">
+                    <h4><i class="mdi mdi-cash"></i> Cash / Card / Online</h4>
+                    <span class="role-badge role-cashier">Cashier</span>
+                    <span class="url">/invoices/{id}/payments</span>
+                    <ul>
+                        <li>Multiple payments per invoice OK</li>
+                        <li>Status: issued → partial → paid</li>
+                        <li>Receipt printable</li>
+                    </ul>
+                </div>
+                <div class="step step-4">
+                    <h4><i class="mdi mdi-shield-check"></i> Insurance Panel</h4>
+                    <span class="role-badge role-cashier">Cashier</span>
+                    <span class="role-badge role-admin">Admin</span>
+                    <span class="url">/insurance-claims/create</span>
+                    <ul>
+                        <li>Submit claim with GL number</li>
+                        <li>Workflow: submitted → approved/rejected → paid</li>
+                        <li><strong>Annual limit auto-deducted</strong> on insurer payment</li>
+                        <li>Patient copay tracked separately</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout" style="margin-top: 16px;">
+                <strong>📋 Invoice Number Format:</strong> <code>{branch}-INV-{YYYYMM}-{seq}</code> · e.g. <code>HQ-INV-202604-0001</code>
+            </div>
+        </section>
+
+        <!-- Slide 11: Phase 5 - Close-out -->
+        <section>
+            <span class="phase phase-5">PHASE 5 · CLOSE-OUT</span>
+            <h2>Patient Leaves · System Records</h2>
+
+            <div class="step-grid cols-4" style="margin-top: 20px;">
+                <div class="step step-5">
+                    <h4><i class="mdi mdi-check-all"></i> Close Queue</h4>
+                    <span class="role-badge role-reception">Receptionist</span>
+                    <ul>
+                        <li>Status → completed</li>
+                        <li>completed_at timestamped</li>
+                        <li>Queue cleared from TV</li>
+                    </ul>
+                </div>
+                <div class="step step-5">
+                    <h4><i class="mdi mdi-account-circle"></i> Patient Portal</h4>
+                    <span class="role-badge role-patient">Patient</span>
+                    <ul>
+                        <li>View invoice</li>
+                        <li>View lab reports</li>
+                        <li>View prescriptions</li>
+                        <li>Self-serve from /portal</li>
+                    </ul>
+                </div>
+                <div class="step step-5">
+                    <h4><i class="mdi mdi-bell-ring"></i> Notifications</h4>
+                    <span class="role-badge role-system">System (auto)</span>
+                    <ul>
+                        <li>Bell icon dropdown</li>
+                        <li>Fires on key events</li>
+                        <li>Per-user, in-app</li>
+                    </ul>
+                </div>
+                <div class="step step-5">
+                    <h4><i class="mdi mdi-history"></i> Audit Log</h4>
+                    <span class="role-badge role-system">System (auto)</span>
+                    <ul>
+                        <li>Auditable trait</li>
+                        <li>Old/new value diff</li>
+                        <li>Admin views <code>/audit-logs</code></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout success" style="margin-top: 20px;">
+                <strong>✓ Visit Complete</strong> — Patient is gone, but the data thread (lead → patient → consultation → Rx → lab → invoice → claim → audit) is fully linked and queryable.
+            </div>
+        </section>
+
+        <!-- Slide 12: Back-Office -->
+        <section>
+            <span class="phase phase-back">BACK-OFFICE · RUNS ASYNC</span>
+            <h2>Operations Outside Patient Visits</h2>
+            <p class="small">These run on their own schedule — no patient required.</p>
+
+            <div class="step-grid cols-3" style="margin-top: 20px;">
+                <div class="step step-back">
+                    <h4><i class="mdi mdi-truck"></i> Pharmacy Reorder</h4>
+                    <span class="role-badge role-pharmacist">Pharmacist</span>
+                    <span class="url">/purchase-orders/create</span>
+                    <p class="small">Order from suppliers · receive → auto-add stock</p>
+                </div>
+                <div class="step step-back">
+                    <h4><i class="mdi mdi-transit-transfer"></i> Stock Transfers</h4>
+                    <span class="role-badge role-pharmacist">Pharmacist</span>
+                    <span class="url">/stock-transfers/create</span>
+                    <p class="small">Inter-branch · auto-deduct source / add destination</p>
+                </div>
+                <div class="step step-back">
+                    <h4><i class="mdi mdi-tune"></i> Stock Adjustments</h4>
+                    <span class="role-badge role-pharmacist">Pharmacist</span>
+                    <span class="url">/stock-adjustments/create</span>
+                    <p class="small">Expired / damaged / corrections with reason</p>
+                </div>
+                <div class="step step-back">
+                    <h4><i class="mdi mdi-cash-multiple"></i> Locum Payments</h4>
+                    <span class="role-badge role-admin">Admin</span>
+                    <span class="url">/locum-payments/create</span>
+                    <p class="small">Batch payment · gross / deductions / net</p>
+                </div>
+                <div class="step step-back">
+                    <h4><i class="mdi mdi-calendar-multiple"></i> Roster + Leave</h4>
+                    <span class="role-badge role-admin">Admin</span>
+                    <span class="url">/roster · /roster/leaves</span>
+                    <p class="small">Shifts · leave requests · swap requests</p>
+                </div>
+                <div class="step step-back">
+                    <h4><i class="mdi mdi-chart-bar"></i> Reports + Audit</h4>
+                    <span class="role-badge role-admin">Admin</span>
+                    <span class="url">/reports · /audit-logs</span>
+                    <p class="small">5 reports + CSV exports · full audit trail</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 13: Responsibility Matrix -->
+        <section>
+            <h2><i class="mdi mdi-account-multiple"></i> Responsibility Matrix</h2>
+            <p class="small">Who does what, where.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:8%">Phase</th>
+                        <th style="width:25%">Action</th>
+                        <th style="width:25%">Person Responsible</th>
+                        <th style="width:42%">Module</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Lead Capture + Follow-up + Convert</td><td><strong>Sales Team</strong></td><td><code>/leads · /leads/{id} · /leads/{id}/convert</code></td></tr>
+                    <tr><td>2</td><td>Walk-in Reg + Appointment Check-in</td><td><strong>Receptionist</strong></td><td><code>/walk-in-queue/* · /appointments</code></td></tr>
+                    <tr><td>2</td><td>Call Next (waiting → serving)</td><td><strong>Receptionist / Doctor</strong></td><td><code>/walk-in-queue/call-next</code></td></tr>
+                    <tr><td>3</td><td>Vitals (BP, pulse, BMI)</td><td><strong>Nurse</strong></td><td><code>/consultations/{id}/edit</code></td></tr>
+                    <tr><td>3</td><td>Diagnosis + Treatment + MC</td><td><strong>Doctor / Locum Doctor</strong></td><td><code>/consultations/{id}/edit</code></td></tr>
+                    <tr><td>3</td><td>Prescription / Lab Order</td><td><strong>Doctor</strong></td><td><code>/prescriptions/create · /lab-reports/create</code></td></tr>
+                    <tr><td>3</td><td>Run Lab Tests</td><td><strong>Lab Tech / Pharmacist</strong></td><td><code>/lab-reports/{id}/edit</code></td></tr>
+                    <tr><td>3</td><td>Treatment Plan + Referral</td><td><strong>Doctor</strong></td><td><code>/treatment-plans · /referrals</code></td></tr>
+                    <tr><td>4</td><td>Dispense Rx (deduct stock)</td><td><strong>Pharmacist</strong></td><td><code>/prescriptions/{id}/dispense</code></td></tr>
+                    <tr><td>4</td><td>Create Invoice</td><td><strong>Cashier / Receptionist</strong></td><td><code>/invoices/create</code></td></tr>
+                    <tr><td>4</td><td>Cash Payment</td><td><strong>Cashier</strong></td><td><code>/invoices/{id}/payments</code></td></tr>
+                    <tr><td>4</td><td>Insurance Claim Workflow</td><td><strong>Cashier / Admin</strong></td><td><code>/insurance-claims/*</code></td></tr>
+                    <tr><td>5</td><td>Close Queue (mark completed)</td><td><strong>Receptionist</strong></td><td><code>/walk-in-queue/{id}/status</code></td></tr>
+                    <tr><td>5</td><td>Self-service viewing</td><td><strong>Patient</strong></td><td><code>/portal</code></td></tr>
+                    <tr><td>5</td><td>Notifications + Audit (auto)</td><td><strong>System</strong></td><td>bell icon · <code>/audit-logs</code></td></tr>
+                    <tr><td>BO</td><td>PO / Transfers / Adjustments</td><td><strong>Pharmacist</strong></td><td><code>/purchase-orders · /stock-*</code></td></tr>
+                    <tr><td>BO</td><td>Locum Payments / Roster / Reports</td><td><strong>Admin</strong></td><td><code>/locum-payments · /roster · /reports</code></td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Slide 14: Numbering conventions -->
+        <section>
+            <h2><i class="mdi mdi-numeric"></i> Numbering Conventions</h2>
+            <p class="small">Every entity gets a human-readable, branch-scoped ID.</p>
+
+            <table style="font-size: 0.6em; margin-top: 16px;">
+                <thead>
+                    <tr><th>Entity</th><th>Format</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Patient</td><td><code>{branch}-P{seq}</code></td><td><code>HQ-P00001</code></td></tr>
+                    <tr><td>Queue (walk-in)</td><td><code>W{seq}</code></td><td><code>W001</code></td></tr>
+                    <tr><td>Queue (appointment)</td><td><code>A{seq}</code></td><td><code>A001</code></td></tr>
+                    <tr><td>Consultation</td><td><code>CN-{branch}-{YYYYMMDD}-{seq}</code></td><td><code>CN-HQ-20260425-0001</code></td></tr>
+                    <tr><td>Invoice</td><td><code>{branch}-INV-{YYYYMM}-{seq}</code></td><td><code>HQ-INV-202604-0001</code></td></tr>
+                    <tr><td>Lab Report</td><td><code>LAB-{branch}-{seq}</code></td><td><code>LAB-HQ-00001</code></td></tr>
+                    <tr><td>Purchase Order</td><td><code>PO-{branch}-{YYYYMM}-{seq}</code></td><td><code>PO-HQ-202604-0001</code></td></tr>
+                    <tr><td>Stock Transfer</td><td><code>TR-{YYYYMMDD}-{seq}</code></td><td><code>TR-20260425-0001</code></td></tr>
+                    <tr><td>Stock Adjustment</td><td><code>ADJ-{branch}-{YYYYMMDD}-{seq}</code></td><td><code>ADJ-HQ-20260425-0001</code></td></tr>
+                    <tr><td>Membership</td><td><code>MBR-{YYYY}-{seq}</code></td><td><code>MBR-2026-00001</code></td></tr>
+                    <tr><td>Subscription</td><td><code>SUB-{YYYYMM}-{seq}</code></td><td><code>SUB-202604-0001</code></td></tr>
+                    <tr><td>Treatment Plan</td><td><code>TP-{YYYYMM}-{seq}</code></td><td><code>TP-202604-0001</code></td></tr>
+                    <tr><td>Referral</td><td><code>REF-{branch}-{YYYYMM}-{seq}</code></td><td><code>REF-HQ-202604-0001</code></td></tr>
+                    <tr><td>Locum Payment</td><td><code>LP-{YYYYMM}-{seq}</code></td><td><code>LP-202604-0001</code></td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Slide 15: Wrap up -->
+        <section>
+            <div style="text-align: center; padding: 40px;">
+                <i class="mdi mdi-check-decagram" style="font-size: 4em; color: var(--c-phase3);"></i>
+                <h1 style="color: var(--c-text); margin-top: 20px;">End of Patient Journey</h1>
+                <p class="big-num" style="margin: 30px 0 10px 0;">5 Phases · 9 Roles · 1 System</p>
+                <p class="small">Every step audited. Every transition automated. Every patient tracked end-to-end.</p>
+
+                <div style="margin-top: 50px;">
+                    <p class="small"><i class="mdi mdi-github"></i> &nbsp; github.com/wafazz/Clinic-Management-System</p>
+                    <p class="small"><i class="mdi mdi-file-document"></i> &nbsp; PATIENT-FLOW.md · README.md</p>
+                </div>
+
+                <p class="small" style="margin-top: 60px; color: var(--c-muted);">
+                    Built with Laravel 12 · Star Admin Bootstrap 4 · Alpine.js
+                </p>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        slideNumber: 'c/t',
+        transition: 'slide',
+        transitionSpeed: 'default',
+        backgroundTransition: 'fade',
+        controls: true,
+        progress: true,
+        center: false,
+        width: 1400,
+        height: 900,
+        margin: 0.05,
+    });
+</script>
+
+</body>
+</html>
