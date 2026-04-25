@@ -2,36 +2,6 @@
 @section('content')
     <h3 class="font-weight-bold mb-3">Welcome back, {{ explode(' ', $locum->name)[0] }} 👋</h3>
 
-    {{-- DEBUG PANEL — remove after diagnosing --}}
-    @php
-        $allInvitations = \App\Models\LocumInvitation::where('locum_doctor_id', $locum->id)->latest()->get();
-        $serverTz = config('app.timezone');
-        $now = now();
-    @endphp
-    <div class="data-card mb-3" style="background:#fef3c7;border-left:4px solid #f59e0b;font-family:monospace;font-size:12px">
-        <strong>🔍 DEBUG (temporary):</strong><br>
-        Server now: <strong>{{ $now }}</strong> | Timezone: <strong>{{ $serverTz }}</strong><br>
-        <table style="margin-top:8px;font-size:11px;background:#fff;width:100%;border:1px solid #fbbf24;border-radius:4px">
-            <thead><tr><th style="padding:4px 8px">ID</th><th style="padding:4px 8px">Status</th><th style="padding:4px 8px">Valid From</th><th style="padding:4px 8px">Valid To</th><th style="padding:4px 8px">In Range?</th><th style="padding:4px 8px">isActive()</th></tr></thead>
-            <tbody>
-            @foreach($allInvitations as $i)
-                <tr>
-                    <td style="padding:4px 8px">{{ $i->id }}</td>
-                    <td style="padding:4px 8px"><strong>{{ $i->status }}</strong></td>
-                    <td style="padding:4px 8px">{{ $i->valid_from }}</td>
-                    <td style="padding:4px 8px">{{ $i->valid_to }}</td>
-                    <td style="padding:4px 8px">{{ ($now->between($i->valid_from, $i->valid_to)) ? '✅ YES' : '❌ NO' }}</td>
-                    <td style="padding:4px 8px">{{ $i->isActive() ? '✅' : '❌' }}</td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-        <div style="margin-top:8px">
-            activeFor() result:
-            <strong>{{ \App\Models\LocumInvitation::activeFor($locum->id) ? 'Invitation #' . \App\Models\LocumInvitation::activeFor($locum->id)->id : 'NULL (no active invitation found)' }}</strong>
-        </div>
-    </div>
-
     {{-- Active invitation banner --}}
     @if($activeInvitation)
         <div class="data-card mb-3" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;box-shadow:0 8px 24px rgba(16,185,129,0.25)">

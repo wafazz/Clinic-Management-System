@@ -267,6 +267,18 @@ Route::prefix('locum-portal')->group(function () {
         Route::get('payments', [LocumPortalController::class, 'payments'])->name('locum-portal.payments');
         Route::patch('invitations/{invitation}/accept', [LocumPortalController::class, 'acceptInvitation'])->name('locum-portal.invitations.accept');
         Route::patch('invitations/{invitation}/decline', [LocumPortalController::class, 'declineInvitation'])->name('locum-portal.invitations.decline');
+
+        // Consultations (gated by active invitation)
+        Route::get('consultations', [LocumPortalController::class, 'consultations'])->name('locum-portal.consultations');
+        Route::post('consultations/start', [LocumPortalController::class, 'startConsultation'])->name('locum-portal.consultations.start');
+        Route::get('consultations/{consultation}/edit', [LocumPortalController::class, 'editConsultation'])->name('locum-portal.consultations.edit');
+        Route::patch('consultations/{consultation}', [LocumPortalController::class, 'updateConsultation'])->name('locum-portal.consultations.update');
+        Route::patch('consultations/{consultation}/complete', [LocumPortalController::class, 'completeConsultation'])->name('locum-portal.consultations.complete');
+
+        // Treatment plans (gated by active invitation)
+        Route::get('treatment-plans', [LocumPortalController::class, 'treatmentPlans'])->name('locum-portal.treatment-plans');
+        Route::get('treatment-plans/create', [LocumPortalController::class, 'createTreatmentPlan'])->name('locum-portal.treatment-plans.create');
+        Route::post('treatment-plans', [LocumPortalController::class, 'storeTreatmentPlan'])->name('locum-portal.treatment-plans.store');
     });
 });
 
