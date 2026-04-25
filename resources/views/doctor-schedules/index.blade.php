@@ -283,14 +283,20 @@
         <input type="hidden" name="is_available" value="1">
     </form>
 
+    @php
+        $scheduleData = [];
+        foreach ($scheduleByDay as $day => $s) {
+            $scheduleData[$day] = [
+                'day_of_week' => $s->day_of_week,
+                'start_time' => substr($s->start_time, 0, 5),
+                'end_time' => substr($s->end_time, 0, 5),
+                'slot_duration' => $s->slot_duration,
+                'is_available' => (bool) $s->is_available,
+            ];
+        }
+    @endphp
     <script>
-        const SCHEDULE_DATA = @json($scheduleByDay->map(fn($s) => [
-            'day_of_week' => $s->day_of_week,
-            'start_time' => substr($s->start_time, 0, 5),
-            'end_time' => substr($s->end_time, 0, 5),
-            'slot_duration' => $s->slot_duration,
-            'is_available' => (bool) $s->is_available,
-        ]));
+        const SCHEDULE_DATA = @json($scheduleData);
 
         function loadDay(day) {
             window.dispatchEvent(new CustomEvent('load-day', { detail: day }));
