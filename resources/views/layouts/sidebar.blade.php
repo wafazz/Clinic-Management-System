@@ -207,6 +207,7 @@
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('locum-doctors.*') ? 'active' : '' }}" href="{{ route('locum-doctors.index') }}"><i class="mdi mdi-account-card-details mr-2"></i>Doctors</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('locum-sessions.*') ? 'active' : '' }}" href="{{ route('locum-sessions.index') }}"><i class="mdi mdi-calendar-check mr-2"></i>Sessions</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('locum-payments.*') ? 'active' : '' }}" href="{{ route('locum-payments.index') }}"><i class="mdi mdi-cash-multiple mr-2"></i>Payments</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('locum-invitations.*') ? 'active' : '' }}" href="{{ route('locum-invitations.index') }}"><i class="mdi mdi-email-fast mr-2"></i>Invitations</a></li>
                 </ul>
             </div>
         </li>

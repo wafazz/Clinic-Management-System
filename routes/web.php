@@ -43,6 +43,7 @@ use App\Http\Controllers\RosterController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\LocumPaymentController;
 use App\Http\Controllers\LocumPortalController;
+use App\Http\Controllers\LocumInvitationController;
 use App\Http\Controllers\BillplzController;
 use Illuminate\Support\Facades\Route;
 
@@ -124,6 +125,10 @@ Route::middleware(['auth'])->group(function () {
     // Locum Payments (batch)
     Route::resource('locum-payments', LocumPaymentController::class)->except(['edit', 'update']);
     Route::patch('locum-payments/{locumPayment}/mark-paid', [LocumPaymentController::class, 'markPaid'])->name('locum-payments.mark-paid');
+
+    // Locum Invitations (period-bound clinical access)
+    Route::resource('locum-invitations', LocumInvitationController::class)->except(['edit', 'update']);
+    Route::patch('locum-invitations/{locumInvitation}/revoke', [LocumInvitationController::class, 'revoke'])->name('locum-invitations.revoke');
 
     // Suppliers
     Route::resource('suppliers', SupplierController::class)->except('show');
