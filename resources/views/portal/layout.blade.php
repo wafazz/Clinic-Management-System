@@ -7,6 +7,8 @@
     <link rel="icon" type="image/png" href="{{ asset('images/clinicQo.png') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/vendors/iconfonts/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/vendors/css/vendor.bundle.base.css') }}">
+    <link rel="stylesheet" href="{{ asset('star-admin/css/shared/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('star-admin/css/demo_1/style.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="{{ asset('star-admin/css/enhanced.css') }}?v={{ @filemtime(public_path('star-admin/css/enhanced.css')) ?: '1' }}">
     <style>
