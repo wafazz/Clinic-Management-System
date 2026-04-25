@@ -151,6 +151,32 @@ textarea.form-control {
 .btn-outline-warning { border: 1px solid var(--c-warning) !important; color: var(--c-warning) !important; background: transparent !important; }
 .btn-outline-warning:hover { background: var(--c-warning) !important; color: #fff !important; }
 
+/* ============== RESPONSIVE TABLES ============== */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    /* Bootstrap-style edge-fade scroll affordance */
+    background:
+        linear-gradient(to right, #fff 30%, rgba(255, 255, 255, 0)),
+        linear-gradient(to right, rgba(255, 255, 255, 0), #fff 70%) 100% 0,
+        radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0)),
+        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0)) 100% 0;
+    background-repeat: no-repeat;
+    background-color: #fff;
+    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
+}
+.table-responsive > .table {
+    margin-bottom: 0;
+}
+@media (max-width: 768px) {
+    .table-responsive { font-size: 0.85rem; }
+    .table thead th { white-space: nowrap; }
+    .table tbody td { white-space: nowrap; }
+}
+
 /* ============== TABLES ============== */
 .table {
     border-collapse: separate;
