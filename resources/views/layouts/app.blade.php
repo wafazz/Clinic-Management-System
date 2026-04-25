@@ -12,6 +12,14 @@
     <link rel="stylesheet" href="{{ asset('star-admin/css/demo_1/style.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/enhanced.css') }}?v={{ @filemtime(public_path('star-admin/css/enhanced.css')) ?: '1' }}">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/clinicQo.png') }}" />
+
+    {{-- PWA --}}
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ClinicQo">
+    <link rel="apple-touch-icon" href="{{ asset('images/icon-192.png') }}">
     <style>
         .content-wrapper { min-height: calc(100vh - 130px); }
         .badge-status { font-size: 11px; padding: 4px 10px; }
@@ -104,6 +112,35 @@
     <script src="{{ asset('star-admin/vendors/js/vendor.bundle.addons.js') }}"></script>
     <script src="{{ asset('star-admin/js/shared/off-canvas.js') }}"></script>
     <script src="{{ asset('star-admin/js/shared/misc.js') }}"></script>
+
+    {{-- PWA: register service worker + install prompt --}}
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js').catch(function (err) {
+                    console.warn('SW registration failed:', err);
+                });
+            });
+        }
+
+        // Capture beforeinstallprompt for the "Install ClinicQo" button
+        let deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.style.display = 'inline-flex';
+        });
+        window.installClinicQo = function () {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            deferredInstallPrompt.userChoice.then(function () {
+                deferredInstallPrompt = null;
+                const btn = document.getElementById('pwaInstallBtn');
+                if (btn) btn.style.display = 'none';
+            });
+        };
+    </script>
     <script>
         // Auto-wrap any .table that isn't already inside .table-responsive
         // so every table in the app gets horizontal scroll on narrow screens

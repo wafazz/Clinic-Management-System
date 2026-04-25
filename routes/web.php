@@ -53,6 +53,8 @@ Route::get('/', function () {
     return view('landing');
 })->name('landing');
 
+Route::get('/offline', fn() => view('offline'))->name('offline');
+
 Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

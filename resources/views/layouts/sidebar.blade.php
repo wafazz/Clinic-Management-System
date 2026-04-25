@@ -287,5 +287,13 @@
                 <span class="menu-title">Settings</span>
             </a>
         </li>
+
+        <li class="nav-item" id="pwaInstallBtn" style="display:none;">
+            <a class="nav-link" href="#" onclick="event.preventDefault(); window.installClinicQo();">
+                <i class="menu-icon mdi mdi-download" style="color:#10b981"></i>
+                <span class="menu-title" style="color:#10b981">Install App</span>
+                <span class="badge badge-success ml-auto">PWA</span>
+            </a>
+        </li>
     </ul>
 </nav>

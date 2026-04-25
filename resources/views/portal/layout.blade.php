@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Patient Portal — {{ config('app.name', 'ClinicQo') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/clinicQo.png') }}">
+
+    {{-- PWA --}}
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ClinicQo Portal">
+    <link rel="apple-touch-icon" href="{{ asset('images/icon-192.png') }}">
+
     <link rel="stylesheet" href="{{ asset('star-admin/vendors/iconfonts/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/vendors/css/vendor.bundle.base.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/shared/style.css') }}">
@@ -168,6 +176,14 @@
                 }
             });
         });
+        // PWA service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js').catch(function (err) {
+                    console.warn('SW registration failed:', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>
