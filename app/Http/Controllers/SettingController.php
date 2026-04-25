@@ -10,9 +10,23 @@ class SettingController extends Controller
 {
     public function index()
     {
-        $logo = Setting::get('clinic_logo');
-        $clinicName = Setting::get('clinic_name', 'Clinic Management System');
-        return view('settings.index', compact('logo', 'clinicName'));
+        $data = [
+            'logo' => Setting::get('clinic_logo'),
+            'clinicName' => Setting::get('clinic_name', 'Clinic Management System'),
+            // WhatsApp
+            'whatsapp_enabled' => Setting::get('whatsapp_enabled', '0'),
+            'whatsapp_provider' => Setting::get('whatsapp_provider', 'onsend'),
+            'whatsapp_token' => Setting::get('whatsapp_token'),
+            'whatsapp_phone_id' => Setting::get('whatsapp_phone_id'),
+            'whatsapp_endpoint' => Setting::get('whatsapp_endpoint'),
+            // Billplz
+            'billplz_enabled' => Setting::get('billplz_enabled', '0'),
+            'billplz_sandbox' => Setting::get('billplz_sandbox', '1'),
+            'billplz_api_key' => Setting::get('billplz_api_key'),
+            'billplz_collection_id' => Setting::get('billplz_collection_id'),
+            'billplz_x_signature' => Setting::get('billplz_x_signature'),
+        ];
+        return view('settings.index', $data);
     }
 
     public function update(Request $request)
@@ -20,9 +34,30 @@ class SettingController extends Controller
         $request->validate([
             'clinic_name' => 'required|string|max:255',
             'clinic_logo' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
+            'whatsapp_provider' => 'nullable|in:onsend,cloud_api,fonnte,wassenger',
+            'whatsapp_token' => 'nullable|string|max:500',
+            'whatsapp_phone_id' => 'nullable|string|max:100',
+            'whatsapp_endpoint' => 'nullable|url|max:500',
+            'billplz_api_key' => 'nullable|string|max:255',
+            'billplz_collection_id' => 'nullable|string|max:100',
+            'billplz_x_signature' => 'nullable|string|max:255',
         ]);
 
         Setting::set('clinic_name', $request->clinic_name);
+
+        // WhatsApp settings
+        Setting::set('whatsapp_enabled', $request->boolean('whatsapp_enabled') ? '1' : '0');
+        Setting::set('whatsapp_provider', $request->whatsapp_provider ?: 'onsend');
+        if ($request->filled('whatsapp_token')) Setting::set('whatsapp_token', $request->whatsapp_token);
+        if ($request->filled('whatsapp_phone_id')) Setting::set('whatsapp_phone_id', $request->whatsapp_phone_id);
+        Setting::set('whatsapp_endpoint', $request->whatsapp_endpoint);
+
+        // Billplz settings
+        Setting::set('billplz_enabled', $request->boolean('billplz_enabled') ? '1' : '0');
+        Setting::set('billplz_sandbox', $request->boolean('billplz_sandbox') ? '1' : '0');
+        if ($request->filled('billplz_api_key')) Setting::set('billplz_api_key', $request->billplz_api_key);
+        if ($request->filled('billplz_collection_id')) Setting::set('billplz_collection_id', $request->billplz_collection_id);
+        if ($request->filled('billplz_x_signature')) Setting::set('billplz_x_signature', $request->billplz_x_signature);
 
         if ($request->hasFile('clinic_logo')) {
             $oldLogo = Setting::get('clinic_logo');

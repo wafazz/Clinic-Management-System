@@ -31,8 +31,33 @@ class WhatsAppService
             'cloud_api' => $this->sendViaCloudApi($phone, $message),
             'fonnte' => $this->sendViaFonnte($phone, $message),
             'wassenger' => $this->sendViaWassenger($phone, $message),
+            'onsend' => $this->sendViaOnsend($phone, $message),
             default => ['success' => false, 'response' => 'Unknown provider: ' . $provider],
         };
+    }
+
+    private function sendViaOnsend(string $phone, string $message): array
+    {
+        $token = Setting::get('whatsapp_token');
+        $endpoint = Setting::get('whatsapp_endpoint') ?: 'https://app.onsend.io/api/v1/whatsapp/send';
+
+        try {
+            $response = Http::withToken($token)
+                ->acceptJson()
+                ->post($endpoint, [
+                    'recipient' => $this->normalizePhone($phone),
+                    'message' => $message,
+                    'type' => 'text',
+                ]);
+
+            return [
+                'success' => $response->successful(),
+                'response' => $response->body(),
+            ];
+        } catch (\Throwable $e) {
+            Log::error('OnSend.io API error', ['error' => $e->getMessage()]);
+            return ['success' => false, 'response' => $e->getMessage()];
+        }
     }
 
     private function sendViaCloudApi(string $phone, string $message): array

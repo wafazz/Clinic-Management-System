@@ -43,6 +43,7 @@
                         <div class="form-group">
                             <label>Provider</label>
                             <select name="whatsapp_provider" class="form-control form-control-sm">
+                                <option value="onsend" {{ ($whatsapp_provider ?? 'onsend') === 'onsend' ? 'selected' : '' }}>OnSend.io (recommended for MY)</option>
                                 <option value="cloud_api" {{ ($whatsapp_provider ?? '') === 'cloud_api' ? 'selected' : '' }}>Meta WhatsApp Cloud API</option>
                                 <option value="fonnte" {{ ($whatsapp_provider ?? '') === 'fonnte' ? 'selected' : '' }}>Fonnte</option>
                                 <option value="wassenger" {{ ($whatsapp_provider ?? '') === 'wassenger' ? 'selected' : '' }}>Wassenger</option>
@@ -52,6 +53,12 @@
                         <div class="form-group">
                             <label>API Token / Key</label>
                             <input type="password" name="whatsapp_token" value="{{ $whatsapp_token ?? '' }}" class="form-control form-control-sm" placeholder="{{ $whatsapp_token ? '••••••••' : 'Paste token here' }}" autocomplete="off" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Custom Endpoint URL <small class="text-muted">(optional — overrides default)</small></label>
+                            <input type="url" name="whatsapp_endpoint" value="{{ $whatsapp_endpoint ?? '' }}" class="form-control form-control-sm" placeholder="https://app.onsend.io/api/v1/whatsapp/send" />
+                            <small class="text-muted">Leave blank to use the provider's default endpoint.</small>
                         </div>
 
                         <div class="form-group">
