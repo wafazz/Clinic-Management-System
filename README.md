@@ -1,8 +1,12 @@
-# Clinic Management System (Multi-Branch)
+# ClinicQo — Clinic Management System (Multi-Branch)
 
-A full-featured clinic management system for multi-branch clinics in Malaysia. Covers the complete patient journey from lead capture through registration, queue, consultation, prescription, lab, billing, insurance, membership, and treatment plans — plus full pharmacy inventory chain, staff roster, and locum batch payments.
+<p align="center"><img src="public/images/clinicQo.png" alt="ClinicQo" width="320"></p>
 
-Built with **Laravel 12 + PHP Blade + Star Admin Bootstrap 4 + Alpine.js**.
+A full-featured **Progressive Web App** clinic management system for multi-branch clinics in Malaysia. Covers the complete patient journey from lead capture through registration, queue, consultation, prescription, lab, billing, insurance, membership, and treatment plans — plus full pharmacy inventory chain, staff roster, locum batch payments, and period-bound locum clinical access via invitations.
+
+**Live demo:** [https://cms.codexlure.my](https://cms.codexlure.my)
+
+Built with **Laravel 12 + PHP 8.3 + Blade + Star Admin Bootstrap 4 + Alpine.js + PWA**.
 
 ---
 
@@ -41,9 +45,12 @@ Built with **Laravel 12 + PHP Blade + Star Admin Bootstrap 4 + Alpine.js**.
 - **Insurance Claims** — claim submission, status tracking (submitted → approved/rejected → paid), annual limit auto-deduction on payment
 
 ### 5. Locum Operations
-- **Locum Doctors** — locum directory with rates
+- **Locum Doctors** — locum directory with rates and **portal login** (IC + password)
 - **Locum Sessions** — session-based engagements with payment tracking
 - **Locum Batch Payments** — period-based payment runs (gross / deductions / net), session bundling, approval workflow, mark-paid
+- **Locum Invitations (period-bound clinical access)** — admin invites a locum for a specific datetime window with permission flags (consultations / treatment plans / approval-required). Locum accepts/declines from their portal. During active period, the locum portal exposes consultation queue and treatment plan creation. Outside the period, access auto-expires.
+- **Locum Portal** — separate login at `/locum-portal/login`, read-only by default (sessions, payments, earnings) but unlocks Consultations + Treatment Plans tabs when an invitation is active. Can start consultations from the queue, write vitals/clinical notes/diagnosis, complete and hand off to reception for billing.
+- **Treatment Plan Approval Queue** — plans created by locums appear in admin's pending-approval queue with one-click Approve / Reject (with reason visible to locum).
 
 ### 6. Staff Operations
 - **Staff Roster** — weekly grid view by user, add/delete shifts (morning/afternoon/night/full/custom)
@@ -51,14 +58,18 @@ Built with **Laravel 12 + PHP Blade + Star Admin Bootstrap 4 + Alpine.js**.
 - **Shift Swaps** — swap-request workflow with approval
 
 ### 7. System
+- **Landing Page** — public marketing page at `/` (auto-redirects logged-in users to dashboard); features hero with live "Today at HQ" mock card, 6 feature cards, 4-step workflow, security/trust grid, sign-in + patient portal CTAs
+- **Progressive Web App (PWA)** — installable on Android / iOS / desktop. Manifest, service worker (cache-first for assets, network-first for HTML), offline fallback page, "Install ClinicQo" prompt in sidebar, 3 home-screen shortcuts (Dashboard, Walk-In Queue, Patient Portal)
 - **Multi-Branch** — branch switcher, all data scoped to current branch
 - **RBAC** — 9 roles (admin, doctor, staff, receptionist, super_admin, nurse, pharmacist, sales_team, locum_doctor), role-based menu visibility
 - **Audit Logs** — admin-only, tracks create/update/delete on 14+ models with old/new values diff
 - **In-App Notifications** — bell icon dropdown + full index, fires on appointments / payments / claims / dispensing / lab / low stock
-- **Patient Portal** — separate auth, view appointments / invoices / lab reports / prescriptions, profile + password
+- **Patient Portal** — separate auth, view appointments / invoices / lab reports / prescriptions, **change password** (with live strength meter), profile
+- **Locum Portal** — separate auth, sessions/payments/earnings, plus consultations + treatment plans during active invitation
 - **Reports** — 5 categories (Financial, Patients, Appointments, Pharmacy, Lab) with CSV export
-- **Settings** — clinic info, logo upload, system preferences
-- **WhatsApp Reminders** — appointment reminders (simulated mode, ready for API integration)
+- **Settings** — clinic info, logo upload, OnSend.io WhatsApp configuration, Billplz payment gateway configuration
+- **WhatsApp Reminders** — production-ready via OnSend.io (default), Meta Cloud API, Fonnte, or Wassenger
+- **Online Payments** — Billplz integration with X-Signature callback verification
 
 ---
 
@@ -121,7 +132,7 @@ Built with **Laravel 12 + PHP Blade + Star Admin Bootstrap 4 + Alpine.js**.
 | **super_admin** | Highest authority, manages everything including admins |
 | **admin** | Full access + user management + audit logs |
 | **doctor** | Consultations, patients, appointments, prescriptions, lab, treatment plans, referrals |
-| **locum_doctor** | Locum sessions, consultations during shifts |
+| **locum_doctor** | Locum portal — sessions, payments, earnings; consultations + treatment plans during active invitation only (separate login at `/locum-portal/login`) |
 | **nurse** | Patient vitals, queue assistance, consultation support |
 | **pharmacist** | Medicines, stock, prescriptions, dispensing, purchase orders, transfers |
 | **receptionist** | Patients, appointments, queue, billing, leads |
@@ -187,7 +198,10 @@ Open <http://127.0.0.1:8000>.
 | Admin | `admin@clinic.com` | `password` |
 | Patient Portal | IC `900101-01-1234` | `patient123` |
 
-> Patient Portal is at <http://127.0.0.1:8000/portal/login> (separate URL).
+> Three separate login URLs:
+> - **Staff**: <http://127.0.0.1:8000/login>
+> - **Patient Portal**: <http://127.0.0.1:8000/portal/login>
+> - **Locum Portal**: <http://127.0.0.1:8000/locum-portal/login>
 
 ---
 
@@ -196,21 +210,29 @@ Open <http://127.0.0.1:8000>.
 ```
 clinic-app/
 ├── app/
-│   ├── Http/Controllers/        # 36+ controllers
-│   ├── Models/                  # 56 Eloquent models
-│   ├── Http/Middleware/         # PortalAuth, AdminOnly, etc.
+│   ├── Http/Controllers/        # 47 controllers
+│   ├── Models/                  # 57 Eloquent models
+│   ├── Services/                # WhatsAppService, BillplzService
+│   ├── Http/Middleware/         # PortalAuth, LocumPortalAuth, AdminOnly
 │   └── Traits/                  # Auditable, NotifiesUsers
 ├── database/
-│   ├── migrations/              # 46 migrations
+│   ├── migrations/              # 50 migrations
 │   └── seeders/                 # DatabaseSeeder + module seeders
-├── resources/views/             # Blade views (organized by feature)
+├── public/
+│   ├── manifest.webmanifest     # PWA manifest
+│   ├── sw.js                    # Service worker
+│   ├── images/                  # Logo + PWA icons (16/32/48/192/512 + maskable + apple-touch)
+│   └── star-admin/              # Static UI assets + enhanced.css overrides
+├── resources/views/             # Blade views — 162 templates (organized by feature)
+│   ├── landing.blade.php        # Public marketing page
+│   ├── offline.blade.php        # PWA offline fallback
 │   ├── consultations/           # Vitals + clinical form + MC print
-│   ├── walk-in-queue/           # Queue + TV display
-│   ├── treatment-plans/         # Multi-session plans
+│   ├── walk-in-queue/           # Queue + live TV display (audio + voice announce)
+│   ├── treatment-plans/         # Multi-session plans + pending-approval queue
 │   ├── referrals/
 │   ├── leads/                   # Sales CRM
-│   ├── membership-tiers/
-│   ├── patient-memberships/
+│   ├── membership-tiers/        # Tiers
+│   ├── patient-memberships/     # Patient enrollments
 │   ├── service-packages/
 │   ├── patient-subscriptions/
 │   ├── suppliers/
@@ -218,10 +240,12 @@ clinic-app/
 │   ├── stock-transfers/
 │   ├── stock-adjustments/
 │   ├── locum-payments/
+│   ├── locum-invitations/       # Period-bound clinical access
+│   ├── locum-portal/            # Locum portal (separate auth)
 │   ├── roster/                  # Weekly grid + leaves
 │   ├── prescriptions/
 │   ├── lab/
-│   ├── invoices/
+│   ├── invoices/                # Includes receipt-pdf.blade.php for DomPDF
 │   ├── insurance/
 │   ├── portal/                  # Patient portal
 │   └── layouts/                 # app.blade.php, sidebar.blade.php
@@ -568,7 +592,7 @@ clinic-app/
 
 **Insurance**: `insurance_panels`, `patient_insurances`, `insurance_claims`
 
-**Locum**: `locum_doctors`, `locum_sessions`, `locum_payments` + `locum_payment_items`
+**Locum**: `locum_doctors`, `locum_sessions`, `locum_payments` + `locum_payment_items`, `locum_invitations`
 
 **Roster**: `staff_shifts`, `leave_requests`, `shift_swaps`
 
@@ -582,13 +606,16 @@ clinic-app/
 
 | URL | Purpose |
 |---|---|
-| `/dashboard` | Branch overview, today's stats |
+| `/` | Public landing page (auto-redirect to dashboard if logged in) |
+| `/dashboard` | Branch overview with hero banner, gradient KPI cards, charts |
 | `/leads` | Sales CRM with status filter + stats |
 | `/walk-in-queue` | Today's queue with call-next |
-| `/walk-in-queue/display` | TV display screen for waiting area |
+| `/walk-in-queue/display` | Live TV display with audio chime + voice announcements |
 | `/consultations` | All consultations (filterable) |
 | `/treatment-plans` | Treatment plans with progress tracking |
+| `/treatment-plans/pending-approval` | Admin approval queue for locum-created plans |
 | `/referrals` | External referrals |
+| `/locum-invitations` | Period-bound clinical access invitations |
 | `/membership-tiers` | Tier configuration |
 | `/patient-memberships` | Active memberships |
 | `/service-packages` | Package catalog |
@@ -606,6 +633,8 @@ clinic-app/
 | `/reports` | Reports hub |
 | `/audit-logs` | Admin-only audit trail |
 | `/portal/login` | Patient portal entry |
+| `/locum-portal/login` | Locum portal entry |
+| `/offline` | PWA offline fallback page |
 
 ---
 
@@ -709,11 +738,43 @@ Implementation: `app/Services/BillplzService.php` + `app/Http/Controllers/Billpl
 ### Receipt PDF
 Generated via DomPDF. Visit any invoice → click **PDF** button. Template at `resources/views/invoices/receipt-pdf.blade.php`.
 
-### Locum Portal
-Live at `/locum-portal/login`. Locums log in with IC number + password (set by clinic admin via `LocumDoctor.password`). Sees their own dashboard with sessions, payments, outstanding balance, monthly earnings. Implementation: `LocumPortalController` + `LocumPortalAuth` middleware (separate session key from staff auth).
+### Locum Portal + Period-Bound Clinical Access
+Live at `/locum-portal/login`. Locums log in with IC number + password (set by clinic admin via `LocumDoctor.password`). Default access is read-only: sessions, payments, outstanding balance, monthly earnings.
+
+**Clinical access via Invitation:**
+1. Admin creates a `LocumInvitation` at `/locum-invitations/create` with:
+   - Locum doctor + branch
+   - Valid datetime range (e.g. `2026-04-25 09:00 → 2026-04-25 17:00`)
+   - Permission toggles: Allow Consultations · Allow Treatment Plans · Treatment plans require admin approval
+2. Locum logs in to portal — sees pending invitation card with Accept / Decline
+3. After accepting, **during the active period only**, the locum portal nav exposes:
+   - **Consultations** — see today's queue at the branch, click Start on any waiting patient → opens consultation form (vitals, clinical notes, diagnosis, follow-up). Click Complete & Bill to hand off to reception.
+   - **Treatment Plans** — create multi-session plans. If approval required, plan saved as `pending_approval`; locum sees status in their list.
+4. Outside the period, the nav links and Active Now banner disappear automatically — no DB update needed.
+5. Treatment plans submitted by locums appear in admin's `/treatment-plans/pending-approval` queue. Admin can Approve (one click) or Reject (with reason that the locum sees).
+
+Implementation: `LocumPortalController` + `LocumInvitationController` + `LocumPortalAuth` middleware. `LocumInvitation::activeFor($locumId)` returns the currently-active invitation if any.
+
+### Progressive Web App (PWA)
+ClinicQo is installable on Android, iOS, and desktop browsers.
+
+- **Manifest**: `public/manifest.webmanifest` — name, theme color, 4 icon sizes (any + maskable), 3 home-screen shortcuts (Dashboard, Walk-In Queue, Patient Portal)
+- **Service Worker**: `public/sw.js` — cache-first for static assets (CSS/JS/fonts/images), network-first for HTML pages, falls back to `/offline` when offline
+- **Offline page**: `resources/views/offline.blade.php` — branded page with retry button + auto-reload on `online` event
+- **Install prompt**: Staff sidebar shows "Install App" button when browser fires `beforeinstallprompt` (Chrome/Edge desktop + Android)
+- **iOS support**: `apple-mobile-web-app-capable` meta + `apple-touch-icon.png` for home-screen install via Safari Share menu
 
 ### Charts
 Live on the main `/dashboard`. Three Chart.js charts (revenue line with gradient fill, appointment doughnut, daily appointments bar). Chart.js is bundled with the Star Admin vendor JS.
+
+### Live TV Display Screen
+`/walk-in-queue/display` is a kiosk-friendly screen for the waiting area:
+- Animated dark gradient background with floating orbs
+- 200px gradient queue number with pulse animation
+- **Audio chime + Web Speech API voice announcement** when a new number is called ("Number A 0 0 1, Aisyah, please proceed to Dr. Tan")
+- Live AJAX polling every 5s — no full-page reload
+- Priority members shown with red star bouncing badge
+- One-time "Enable Live Announcements" overlay to unlock audio + auto-fullscreen on first click
 
 ---
 
