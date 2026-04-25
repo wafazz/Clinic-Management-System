@@ -669,13 +669,14 @@ php artisan pail
 ## Integrations
 
 ### WhatsApp Reminders
-Production-ready. Configure under **Settings → WhatsApp Reminders**. Three providers supported:
+Production-ready. Configure under **Settings → WhatsApp Reminders**. Four providers supported:
 
+- **OnSend.io** (default, recommended for Malaysia) — requires API token. Default endpoint `https://app.onsend.io/api/v1/whatsapp/send`. Override via the "Custom Endpoint URL" field if their docs specify a different path.
 - **Meta WhatsApp Cloud API** (official) — requires Access Token + Phone Number ID
-- **Fonnte** — popular Indonesian/Malaysian provider, requires API token
+- **Fonnte** — popular MY/ID provider, requires API token
 - **Wassenger** — alternative provider, requires API token
 
-If unconfigured, reminders log a simulated success (safe for development). Phone numbers auto-normalized to Malaysia country code (60).
+If unconfigured, reminders log a simulated success (safe for development). Phone numbers auto-normalized to Malaysia country code (60). All providers use Bearer-token auth with JSON body.
 
 Implementation: `app/Services/WhatsAppService.php`.
 
