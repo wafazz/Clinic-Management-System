@@ -2,6 +2,67 @@
 @section('content')
     <h3 class="font-weight-bold mb-3">Welcome back, {{ explode(' ', $locum->name)[0] }} 👋</h3>
 
+    {{-- Active invitation banner --}}
+    @if($activeInvitation)
+        <div class="data-card mb-3" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;box-shadow:0 8px 24px rgba(16,185,129,0.25)">
+            <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:12px">
+                <div>
+                    <small style="opacity:0.85;letter-spacing:0.05em;text-transform:uppercase;font-weight:700">
+                        <i class="mdi mdi-circle" style="font-size:8px"></i> Active Now
+                    </small>
+                    <h5 class="mb-1 text-white font-weight-bold">You have clinical access at {{ $activeInvitation->branch->name }}</h5>
+                    <p class="mb-0" style="opacity:0.95;font-size:0.9rem">
+                        Until {{ $activeInvitation->valid_to->format('d M Y, h:i A') }}
+                        ({{ $activeInvitation->valid_to->diffForHumans() }})
+                    </p>
+                    <div class="mt-2">
+                        @if($activeInvitation->can_consultation)<span class="badge badge-light text-success mr-1"><i class="mdi mdi-stethoscope"></i> Consultations</span>@endif
+                        @if($activeInvitation->can_treatment_plan)<span class="badge badge-light text-info"><i class="mdi mdi-clipboard-list"></i> Treatment Plans @if($activeInvitation->treatment_plan_requires_approval)<small>(approval req.)</small>@endif</span>@endif
+                    </div>
+                </div>
+                <div>
+                    @if($activeInvitation->can_consultation)
+                        <a href="/locum-portal/consultations" class="btn btn-light font-weight-bold"><i class="mdi mdi-arrow-right-bold"></i> Start Working</a>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Pending invitations --}}
+    @foreach($pendingInvitations as $inv)
+        <div class="data-card mb-3" style="border-left:4px solid #f59e0b">
+            <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:12px">
+                <div>
+                    <small class="text-warning font-weight-bold" style="letter-spacing:0.05em;text-transform:uppercase">
+                        <i class="mdi mdi-email-mark-as-unread"></i> Pending Invitation
+                    </small>
+                    <h5 class="mb-1 font-weight-bold mt-1">Clinical access at {{ $inv->branch->name }}</h5>
+                    <p class="mb-2 text-muted" style="font-size:0.9rem">
+                        <i class="mdi mdi-clock"></i>
+                        {{ $inv->valid_from->format('d M Y, h:i A') }} → {{ $inv->valid_to->format('d M Y, h:i A') }}
+                    </p>
+                    <div class="mb-2">
+                        @if($inv->can_consultation)<span class="badge badge-info mr-1"><i class="mdi mdi-stethoscope"></i> Consultations</span>@endif
+                        @if($inv->can_treatment_plan)<span class="badge badge-info"><i class="mdi mdi-clipboard-list"></i> Treatment Plans</span>@endif
+                    </div>
+                    @if($inv->notes)<p class="small text-muted mb-2"><em>"{{ $inv->notes }}"</em></p>@endif
+                    @if($inv->createdBy)<small class="text-muted">Invited by {{ $inv->createdBy->name }}</small>@endif
+                </div>
+                <div class="d-flex" style="gap:8px">
+                    <form method="POST" action="{{ route('locum-portal.invitations.accept', $inv) }}" class="d-inline">
+                        @csrf @method('PATCH')
+                        <button class="btn btn-success"><i class="mdi mdi-check-circle"></i> Accept</button>
+                    </form>
+                    <form method="POST" action="{{ route('locum-portal.invitations.decline', $inv) }}" class="d-inline" onsubmit="return confirm('Decline this invitation?')">
+                        @csrf @method('PATCH')
+                        <button class="btn btn-outline-danger"><i class="mdi mdi-close"></i> Decline</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
     <div class="row">
         <div class="col-md-3 col-6 mb-3"><div class="stat-card"><div class="num text-primary">{{ $totalSessions }}</div><div class="label">Total Sessions</div></div></div>
         <div class="col-md-3 col-6 mb-3"><div class="stat-card"><div class="num text-info">{{ $sessionsThisMonth }}</div><div class="label">This Month</div></div></div>

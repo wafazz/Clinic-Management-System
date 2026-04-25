@@ -34,9 +34,16 @@
     <nav class="navbar d-flex align-items-center">
         <a href="{{ route('locum-portal.dashboard') }}" class="brand"><i class="mdi mdi-account-tie mr-1"></i>Locum Portal</a>
         <div class="ml-4 flex-grow-1">
+            @php $activeInv = \App\Models\LocumInvitation::activeFor($locum->id); @endphp
             <a href="{{ route('locum-portal.dashboard') }}" class="{{ request()->routeIs('locum-portal.dashboard') ? 'active' : '' }}">Dashboard</a>
             <a href="{{ route('locum-portal.sessions') }}" class="{{ request()->routeIs('locum-portal.sessions') ? 'active' : '' }}">Sessions</a>
             <a href="{{ route('locum-portal.payments') }}" class="{{ request()->routeIs('locum-portal.payments') ? 'active' : '' }}">Payments</a>
+            @if($activeInv && $activeInv->can_consultation)
+                <a href="/locum-portal/consultations" class="{{ request()->routeIs('locum-portal.consultations*') ? 'active' : '' }}" style="background:rgba(16,185,129,0.25);border-radius:6px;padding:4px 12px"><i class="mdi mdi-stethoscope"></i> Consultations</a>
+            @endif
+            @if($activeInv && $activeInv->can_treatment_plan)
+                <a href="/locum-portal/treatment-plans" class="{{ request()->routeIs('locum-portal.treatment-plans*') ? 'active' : '' }}" style="background:rgba(16,185,129,0.25);border-radius:6px;padding:4px 12px;margin-left:6px"><i class="mdi mdi-clipboard-list"></i> Treatment Plans</a>
+            @endif
         </div>
         <div class="right">
             <span><i class="mdi mdi-account mr-1"></i>{{ $locum->name }}</span>

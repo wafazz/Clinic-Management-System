@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LocumDoctor;
 use App\Models\LocumSession;
 use App\Models\LocumPayment;
+use App\Models\LocumInvitation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -76,10 +77,40 @@ class LocumPortalController extends Controller
         $payments = LocumPayment::where('locum_doctor_id', $locum->id)
             ->orderBy('created_at', 'desc')->limit(5)->get();
 
+        // Invitations
+        $pendingInvitations = LocumInvitation::with('branch', 'createdBy')
+            ->where('locum_doctor_id', $locum->id)
+            ->where('status', 'pending')
+            ->where('valid_to', '>', now())
+            ->latest()->get();
+
+        $activeInvitation = LocumInvitation::activeFor($locum->id);
+
         return view('locum-portal.dashboard', compact(
             'locum', 'totalSessions', 'sessionsThisMonth', 'unpaidSessions', 'unpaidAmount',
-            'paidThisMonth', 'upcomingSessions', 'recentSessions', 'payments'
+            'paidThisMonth', 'upcomingSessions', 'recentSessions', 'payments',
+            'pendingInvitations', 'activeInvitation'
         ));
+    }
+
+    public function acceptInvitation(LocumInvitation $invitation)
+    {
+        $locum = LocumDoctor::find(session('locum_id'));
+        if (!$locum || $invitation->locum_doctor_id !== $locum->id) abort(403);
+        if ($invitation->status !== 'pending') return back()->with('error', 'Invitation no longer pending.');
+
+        $invitation->update(['status' => 'accepted', 'accepted_at' => now()]);
+        return back()->with('success', 'Invitation accepted. You can now access consultations during the period.');
+    }
+
+    public function declineInvitation(LocumInvitation $invitation)
+    {
+        $locum = LocumDoctor::find(session('locum_id'));
+        if (!$locum || $invitation->locum_doctor_id !== $locum->id) abort(403);
+        if ($invitation->status !== 'pending') return back()->with('error', 'Invitation no longer pending.');
+
+        $invitation->update(['status' => 'declined']);
+        return back()->with('success', 'Invitation declined.');
     }
 
     public function sessions()

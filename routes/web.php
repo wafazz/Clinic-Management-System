@@ -262,6 +262,8 @@ Route::prefix('locum-portal')->group(function () {
         Route::get('/', [LocumPortalController::class, 'dashboard'])->name('locum-portal.dashboard');
         Route::get('sessions', [LocumPortalController::class, 'sessions'])->name('locum-portal.sessions');
         Route::get('payments', [LocumPortalController::class, 'payments'])->name('locum-portal.payments');
+        Route::patch('invitations/{invitation}/accept', [LocumPortalController::class, 'acceptInvitation'])->name('locum-portal.invitations.accept');
+        Route::patch('invitations/{invitation}/decline', [LocumPortalController::class, 'declineInvitation'])->name('locum-portal.invitations.decline');
     });
 });
 
