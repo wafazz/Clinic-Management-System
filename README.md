@@ -64,16 +64,53 @@ Built with **Laravel 12 + PHP Blade + Star Admin Bootstrap 4 + Alpine.js**.
 
 ## Tech Stack
 
+### Backend
+
+| Layer | Technology | Version |
+|---|---|---|
+| Language | PHP | ^8.3 (tested on 8.4) |
+| Framework | Laravel | ^12.0 (12.57+) |
+| ORM | Eloquent | bundled |
+| REPL | Laravel Tinker | ^2.10 |
+| PDF | barryvdh/laravel-dompdf | ^3.1 |
+| Auth (staff) | Laravel Breeze | ^2.4 |
+| Auth (patient) | Custom PortalAuth middleware | — |
+
+### Frontend
+
+| Layer | Technology | Version |
+|---|---|---|
+| Templating | Blade | bundled |
+| Reactivity | Alpine.js | ^3.4 |
+| UI theme | Star Admin Free (Bootstrap 4) | static assets |
+| Charts | Chart.js | bundled with Star Admin |
+| Icons | Material Design Icons | bundled with Star Admin |
+| Build tool | Vite | ^7.0 |
+| Vite plugin | laravel-vite-plugin | ^2.0 |
+| Optional CSS | Tailwind CSS | ^3.1 (legacy components only) |
+| HTTP | axios | ^1.11 |
+
+### Database
+
 | Layer | Technology |
 |---|---|
-| Framework | Laravel 12 |
-| PHP | 8.3+ (tested on 8.4) |
-| Frontend | Blade + Alpine.js |
-| UI Template | Star Admin Free (Bootstrap 4) |
-| Database | MySQL / MariaDB |
-| PDF | barryvdh/laravel-dompdf ^3.1 |
-| Auth | Laravel Breeze (web) + custom PortalAuth middleware (patient portal) |
-| Build | Vite (only used for legacy Tailwind components — Star Admin assets are static) |
+| Engine | MySQL 5.7+ / MariaDB 10.4+ |
+| Migrations | 47 migrations |
+| Models | 56 Eloquent models |
+| Connection | Default `mysql` driver (port 3307 for XAMPP/MAMP) |
+
+### Dev tooling
+
+| Tool | Purpose |
+|---|---|
+| Laravel Pail | Tail logs in real-time |
+| Laravel Pint | Code style fixer |
+| Laravel Sail | Docker-based dev env (optional) |
+| PHPUnit ^11.5 | Test runner |
+| Mockery ^1.6 | Mocking |
+| Faker ^1.23 | Seed data |
+| Collision ^8.6 | Better CLI errors |
+| concurrently | Run server + queue + vite + logs in parallel (`composer dev`) |
 
 ---
 
