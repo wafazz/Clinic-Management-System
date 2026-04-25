@@ -43,20 +43,87 @@
                         </div>
 
                         <h6 class="text-muted text-uppercase font-weight-bold mt-3 mb-2" style="font-size:0.78rem;letter-spacing:0.05em">Permissions</h6>
-                        <div class="p-3" style="background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-                            <div class="form-check mb-2">
-                                <input type="checkbox" name="can_consultation" value="1" id="canCons" class="form-check-input" checked>
-                                <label for="canCons" class="form-check-label"><i class="mdi mdi-stethoscope text-success mr-1"></i><strong>Allow Consultations</strong> <small class="text-muted">— start consultations during the period and write clinical notes, prescriptions, MC, lab orders</small></label>
+
+                        <div class="perm-row" x-data="{ on: true }">
+                            <div class="perm-row-icon" style="background:rgba(16,185,129,0.12);color:#10b981"><i class="mdi mdi-stethoscope"></i></div>
+                            <div class="perm-row-text">
+                                <strong>Allow Consultations</strong>
+                                <p>Start consultations during the period and write clinical notes, prescriptions, MC, lab orders.</p>
                             </div>
-                            <div class="form-check mb-2">
-                                <input type="checkbox" name="can_treatment_plan" value="1" id="canTP" class="form-check-input" checked>
-                                <label for="canTP" class="form-check-label"><i class="mdi mdi-clipboard-list text-info mr-1"></i><strong>Allow Treatment Plans</strong> <small class="text-muted">— create multi-session treatment plans</small></label>
-                            </div>
-                            <div class="form-check mt-2 ml-4">
-                                <input type="checkbox" name="treatment_plan_requires_approval" value="1" id="reqApproval" class="form-check-input" checked>
-                                <label for="reqApproval" class="form-check-label"><i class="mdi mdi-shield-check text-warning mr-1"></i>Treatment plans require admin approval before activating</label>
-                            </div>
+                            <label class="toggle">
+                                <input type="hidden" name="can_consultation" value="0">
+                                <input type="checkbox" name="can_consultation" value="1" x-model="on" checked>
+                                <span class="slider"></span>
+                            </label>
                         </div>
+
+                        <div class="perm-row" x-data="{ on: true, approval: true }">
+                            <div class="perm-row-icon" style="background:rgba(14,165,233,0.12);color:#0ea5e9"><i class="mdi mdi-clipboard-list"></i></div>
+                            <div class="perm-row-text">
+                                <strong>Allow Treatment Plans</strong>
+                                <p>Create multi-session treatment plans.</p>
+                                <div class="perm-sub" x-show="on">
+                                    <label class="d-flex align-items-center" style="gap:10px;cursor:pointer">
+                                        <input type="hidden" name="treatment_plan_requires_approval" value="0">
+                                        <input type="checkbox" name="treatment_plan_requires_approval" value="1" x-model="approval" checked style="width:18px;height:18px;accent-color:#f59e0b">
+                                        <span><i class="mdi mdi-shield-check text-warning"></i> Require admin approval before activating</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <label class="toggle">
+                                <input type="hidden" name="can_treatment_plan" value="0">
+                                <input type="checkbox" name="can_treatment_plan" value="1" x-model="on" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <style>
+                            .perm-row {
+                                display: flex;
+                                align-items: flex-start;
+                                gap: 14px;
+                                padding: 16px;
+                                background: #f8fafc;
+                                border: 1px solid #e2e8f0;
+                                border-radius: 12px;
+                                margin-bottom: 10px;
+                                transition: border-color 0.2s;
+                            }
+                            .perm-row:hover { border-color: #cbd5e1; }
+                            .perm-row-icon {
+                                width: 40px; height: 40px; border-radius: 10px;
+                                display: inline-flex; align-items: center; justify-content: center;
+                                font-size: 1.3rem; flex-shrink: 0;
+                            }
+                            .perm-row-text { flex: 1; }
+                            .perm-row-text strong { display: block; color: #0f172a; font-size: 1rem; margin-bottom: 2px; }
+                            .perm-row-text p { color: #64748b; font-size: 0.85rem; margin: 0; line-height: 1.4; }
+                            .perm-sub {
+                                margin-top: 10px; padding-top: 10px;
+                                border-top: 1px dashed #cbd5e1;
+                                font-size: 0.85rem; color: #475569;
+                            }
+                            .toggle {
+                                position: relative; display: inline-block;
+                                width: 50px; height: 28px; cursor: pointer; flex-shrink: 0;
+                                margin-top: 6px;
+                            }
+                            .toggle input { opacity: 0; width: 0; height: 0; }
+                            .toggle .slider {
+                                position: absolute; inset: 0;
+                                background: #cbd5e1; border-radius: 999px; transition: 0.3s;
+                            }
+                            .toggle .slider::before {
+                                content: ''; position: absolute;
+                                width: 22px; height: 22px;
+                                left: 3px; top: 3px;
+                                background: #fff; border-radius: 50%; transition: 0.3s;
+                                box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+                            }
+                            .toggle input:checked + .slider { background: linear-gradient(135deg, #10b981, #059669); }
+                            .toggle input:checked + .slider::before { transform: translateX(22px); }
+                        </style>
+                        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
                         <div class="form-group mt-3">
                             <label>Notes <small class="text-muted">(visible to locum)</small></label>
