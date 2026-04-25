@@ -7,11 +7,63 @@
     </x-slot>
 
     <div class="row mb-3">
-        <div class="col-md-3 col-6 mb-2"><div class="card bg-primary text-white"><div class="card-body py-3"><p class="mb-0 small">Total</p><h3 class="mb-0">{{ $stats['total'] }}</h3></div></div></div>
-        <div class="col-md-3 col-6 mb-2"><div class="card bg-info text-white"><div class="card-body py-3"><p class="mb-0 small">New</p><h3 class="mb-0">{{ $stats['new'] }}</h3></div></div></div>
-        <div class="col-md-3 col-6 mb-2"><div class="card bg-warning text-white"><div class="card-body py-3"><p class="mb-0 small">Follow-up</p><h3 class="mb-0">{{ $stats['follow_up'] }}</h3></div></div></div>
-        <div class="col-md-3 col-6 mb-2"><div class="card bg-success text-white"><div class="card-body py-3"><p class="mb-0 small">Converted</p><h3 class="mb-0">{{ $stats['success'] }}</h3></div></div></div>
+        <div class="col-md-3 col-6 mb-2">
+            <div class="lead-stat-tile" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><p class="mb-0 small text-white" style="opacity:0.85">Total</p><h3 class="mb-0 text-white font-weight-bold">{{ $stats['total'] }}</h3></div>
+                    <i class="mdi mdi-account-search mdi-36px text-white" style="opacity:0.75"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <div class="lead-stat-tile" style="background:linear-gradient(135deg,#06b6d4,#0ea5e9);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><p class="mb-0 small text-white" style="opacity:0.85">New</p><h3 class="mb-0 text-white font-weight-bold">{{ $stats['new'] }}</h3></div>
+                    <i class="mdi mdi-plus-circle mdi-36px text-white" style="opacity:0.75"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <div class="lead-stat-tile" style="background:linear-gradient(135deg,#f59e0b,#f97316);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><p class="mb-0 small text-white" style="opacity:0.85">Follow-up</p><h3 class="mb-0 text-white font-weight-bold">{{ $stats['follow_up'] }}</h3></div>
+                    <i class="mdi mdi-bell-ring mdi-36px text-white" style="opacity:0.75"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <div class="lead-stat-tile" style="background:linear-gradient(135deg,#10b981,#059669);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><p class="mb-0 small text-white" style="opacity:0.85">Converted</p><h3 class="mb-0 text-white font-weight-bold">{{ $stats['success'] }}</h3></div>
+                    <i class="mdi mdi-check-decagram mdi-36px text-white" style="opacity:0.75"></i>
+                </div>
+            </div>
+        </div>
     </div>
+
+    @push('styles')
+    <style>
+        .lead-stat-tile {
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .lead-stat-tile:hover { transform: translateY(-2px); }
+        .lead-stat-tile::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+    </style>
+    @endpush
 
     <div class="card"><div class="card-body">
         <form method="GET" class="mb-3 d-flex gap-2">

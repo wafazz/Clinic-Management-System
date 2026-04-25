@@ -12,58 +12,75 @@
     {{-- Stats Cards --}}
     <div class="row mb-3">
         <div class="col-md-3 col-6 mb-2">
-            <div class="card bg-primary text-white">
-                <div class="card-body py-3 px-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="mb-0 small">Total Today</p>
-                            <h3 class="mb-0 font-weight-bold">{{ $stats['total'] }}</h3>
-                        </div>
-                        <i class="mdi mdi-account-multiple mdi-36px"></i>
+            <div class="stat-tile" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-0 small text-white opacity-75">Total Today</p>
+                        <h3 class="mb-0 font-weight-bold text-white">{{ $stats['total'] }}</h3>
                     </div>
+                    <i class="mdi mdi-account-multiple mdi-36px text-white opacity-75"></i>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-6 mb-2">
-            <div class="card bg-warning text-white">
-                <div class="card-body py-3 px-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="mb-0 small">Waiting</p>
-                            <h3 class="mb-0 font-weight-bold">{{ $stats['waiting'] }}</h3>
-                        </div>
-                        <i class="mdi mdi-clock-outline mdi-36px"></i>
+            <div class="stat-tile" style="background:linear-gradient(135deg,#f59e0b,#f97316);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-0 small text-white opacity-75">Waiting</p>
+                        <h3 class="mb-0 font-weight-bold text-white">{{ $stats['waiting'] }}</h3>
                     </div>
+                    <i class="mdi mdi-clock-outline mdi-36px text-white opacity-75"></i>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-6 mb-2">
-            <div class="card bg-info text-white">
-                <div class="card-body py-3 px-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="mb-0 small">Serving</p>
-                            <h3 class="mb-0 font-weight-bold">{{ $stats['serving'] }}</h3>
-                        </div>
-                        <i class="mdi mdi-account-check mdi-36px"></i>
+            <div class="stat-tile" style="background:linear-gradient(135deg,#06b6d4,#0ea5e9);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-0 small text-white opacity-75">Serving</p>
+                        <h3 class="mb-0 font-weight-bold text-white">{{ $stats['serving'] }}</h3>
                     </div>
+                    <i class="mdi mdi-account-check mdi-36px text-white opacity-75"></i>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-6 mb-2">
-            <div class="card bg-success text-white">
-                <div class="card-body py-3 px-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="mb-0 small">Completed</p>
-                            <h3 class="mb-0 font-weight-bold">{{ $stats['completed'] }}</h3>
-                        </div>
-                        <i class="mdi mdi-check-circle mdi-36px"></i>
+            <div class="stat-tile" style="background:linear-gradient(135deg,#10b981,#059669);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-0 small text-white opacity-75">Completed</p>
+                        <h3 class="mb-0 font-weight-bold text-white">{{ $stats['completed'] }}</h3>
                     </div>
+                    <i class="mdi mdi-check-circle mdi-36px text-white opacity-75"></i>
                 </div>
             </div>
         </div>
     </div>
+
+    @push('styles')
+    <style>
+        .stat-tile {
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-tile:hover { transform: translateY(-2px); }
+        .stat-tile::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        .opacity-75 { opacity: 0.85; }
+    </style>
+    @endpush
 
     {{-- Current Serving Banner --}}
     @if($currentServing)

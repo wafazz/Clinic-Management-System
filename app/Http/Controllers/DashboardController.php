@@ -9,6 +9,10 @@ use App\Models\Invoice;
 use App\Models\Doctor;
 use App\Models\Medicine;
 use App\Models\InsuranceClaim;
+use App\Models\WalkInQueue;
+use App\Models\Lead;
+use App\Models\Consultation;
+use App\Models\PatientMembership;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -29,22 +33,56 @@ class DashboardController extends Controller
             $invoiceQuery->where('branch_id', $branchId);
         }
 
-        // KPI cards
+        // Core KPIs
         $totalPatients = $patientQuery->count();
+        $patientsLastMonth = (clone $patientQuery)->where('created_at', '<', now()->startOfMonth())->count();
+        $patientsThisMonth = $totalPatients - $patientsLastMonth;
+        $patientGrowth = $patientsLastMonth > 0 ? round((($patientsThisMonth) / $patientsLastMonth) * 100, 1) : 0;
+
         $todayAppointments = (clone $appointmentQuery)->whereDate('appointment_date', today())->count();
+        $completedToday = (clone $appointmentQuery)->whereDate('appointment_date', today())->where('status', 'completed')->count();
         $pendingAppointments = (clone $appointmentQuery)->where('status', 'pending')->count();
+
         $monthlyRevenue = (clone $invoiceQuery)->where('status', 'paid')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total');
+        $lastMonthRevenue = (clone $invoiceQuery)->where('status', 'paid')
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->sum('total');
+        $revenueGrowth = $lastMonthRevenue > 0 ? round((($monthlyRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1) : 0;
 
-        // Additional KPIs
+        // Secondary KPIs
         $totalDoctors = Doctor::when($branchId, fn($q) => $q->where('branch_id', $branchId))->where('is_active', true)->count();
         $lowStockMedicines = Medicine::when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->whereColumn('current_stock', '<=', 'reorder_level')->count();
         $pendingClaims = InsuranceClaim::when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->whereIn('status', ['draft', 'submitted'])->count();
-        $completedToday = (clone $appointmentQuery)->whereDate('appointment_date', today())->where('status', 'completed')->count();
+        $activeMembers = PatientMembership::where('status', 'active')
+            ->whereHas('patient', fn($q) => $branchId ? $q->where('branch_id', $branchId) : $q)
+            ->count();
+
+        // Today's queue snapshot
+        $queueWaiting = WalkInQueue::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->whereDate('queue_date', today())->where('status', 'waiting')->count();
+        $queueServing = WalkInQueue::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->whereDate('queue_date', today())->where('status', 'serving')->count();
+        $queueCompleted = WalkInQueue::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->whereDate('queue_date', today())->where('status', 'completed')->count();
+        $currentServing = WalkInQueue::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->whereDate('queue_date', today())->where('status', 'serving')
+            ->with('doctor.user')->latest('called_at')->first();
+
+        // In-progress consultations
+        $inProgressConsultations = Consultation::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->where('status', 'in_progress')->count();
+
+        // Sales pipeline (leads)
+        $newLeads = Lead::where('status', 'new_lead')->count();
+        $followUpsDueToday = Lead::whereDate('next_followup_at', today())
+            ->whereNotIn('status', ['success', 'reject', 'duplicate'])
+            ->count();
 
         // Monthly revenue trend (last 6 months)
         $revenueMonths = collect();
@@ -92,7 +130,7 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Recent tables
+        // Recent activity
         $recentAppointments = (clone $appointmentQuery)
             ->with(['patient', 'doctor.user'])
             ->orderBy('appointment_date', 'desc')
@@ -103,12 +141,29 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->limit(5)->get();
 
+        // Top performing doctor this month
+        $topDoctor = DB::table('appointments')
+            ->join('doctors', 'doctors.id', '=', 'appointments.doctor_id')
+            ->join('users', 'users.id', '=', 'doctors.user_id')
+            ->when($branchId, fn($q) => $q->where('appointments.branch_id', $branchId))
+            ->whereMonth('appointments.appointment_date', now()->month)
+            ->whereYear('appointments.appointment_date', now()->year)
+            ->where('appointments.status', 'completed')
+            ->select('users.name', DB::raw('count(*) as total_appointments'))
+            ->groupBy('users.name')
+            ->orderByDesc('total_appointments')
+            ->first();
+
         return view('dashboard', compact(
             'currentBranch', 'totalPatients', 'todayAppointments',
             'pendingAppointments', 'monthlyRevenue', 'totalDoctors',
             'lowStockMedicines', 'pendingClaims', 'completedToday',
             'revenueMonths', 'appointmentStats', 'dailyAppointments',
-            'topServices', 'recentAppointments', 'recentInvoices'
+            'topServices', 'recentAppointments', 'recentInvoices',
+            'patientsThisMonth', 'patientGrowth', 'revenueGrowth',
+            'queueWaiting', 'queueServing', 'queueCompleted', 'currentServing',
+            'inProgressConsultations', 'activeMembers',
+            'newLeads', 'followUpsDueToday', 'topDoctor'
         ));
     }
 
