@@ -30,7 +30,12 @@ class NotificationController extends Controller
         $notification->markAsRead();
 
         if ($notification->link) {
-            return redirect($notification->link);
+            // Strip host so legacy localhost-prefixed links still resolve
+            // against the current domain
+            $path = parse_url($notification->link, PHP_URL_PATH);
+            $query = parse_url($notification->link, PHP_URL_QUERY);
+            $target = ($path ?: '/') . ($query ? '?' . $query : '');
+            return redirect($target);
         }
 
         return back();
