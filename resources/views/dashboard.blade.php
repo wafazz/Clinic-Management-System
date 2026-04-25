@@ -541,7 +541,7 @@
         }
         .top-service-item:last-child { margin-bottom: 0; }
 
-        /* Quick actions */
+        /* Quick actions — adaptive grid */
         .quick-actions-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -556,6 +556,11 @@
             color: #475569;
             transition: all 0.2s ease;
             border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
         }
         .quick-action:hover {
             transform: translateY(-3px);
@@ -567,19 +572,46 @@
             font-size: 1.6em;
             display: block;
             margin-bottom: 6px;
+            line-height: 1;
         }
         .quick-action span {
             font-size: 0.78em;
             font-weight: 600;
+            line-height: 1.2;
+            text-align: center;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        /* Responsive breakpoints */
+        @media (max-width: 1199px) {
+            .quick-actions-grid { grid-template-columns: repeat(6, 1fr); }
+        }
+        @media (max-width: 991px) {
             .quick-actions-grid { grid-template-columns: repeat(4, 1fr); }
-            .kpi-card { min-height: auto; padding: 16px; }
+        }
+        @media (max-width: 575px) {
+            .quick-actions-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .quick-action {
+                padding: 12px 4px;
+                min-height: 72px;
+                border-radius: 10px;
+            }
+            .quick-action i { font-size: 1.4em; margin-bottom: 4px; }
+            .quick-action span { font-size: 0.7em; }
+        }
+        @media (max-width: 360px) {
+            .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Other mobile adjustments */
+        @media (max-width: 768px) {
+            .kpi-card { min-height: auto; padding: 16px; height: auto !important; }
             .kpi-card .kpi-value { font-size: 1.5em; }
             .dashboard-hero-content { padding: 20px; }
             .hero-stat-grid { margin-top: 16px; }
+            .mini-kpi { height: auto !important; min-height: 90px; }
         }
     </style>
     @endpush
