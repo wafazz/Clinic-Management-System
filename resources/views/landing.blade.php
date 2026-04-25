@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="ClinicQo — modern, multi-branch clinic management system for Malaysia. Patients, appointments, queue, consultation, billing, and online payments — all in one place.">
     <title>ClinicQo — Clinic Management System</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/clinicQo.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/icon-32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/icon-16.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
