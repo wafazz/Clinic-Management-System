@@ -190,10 +190,35 @@ class LocumPortalController extends Controller
         return redirect()->route('locum-portal.consultations.edit', $consultation);
     }
 
+    /**
+     * Locum can edit a consultation if:
+     * 1. They own it (locum_doctor_id matches), OR
+     * 2. The consultation is at their active invitation's branch AND has no
+     *    other locum claim — auto-claim it so legacy/orphaned ones work.
+     */
+    private function canEditConsultation(Consultation $consultation, ?LocumDoctor $locum): bool
+    {
+        if (!$locum) return false;
+        if ($consultation->locum_doctor_id === $locum->id) return true;
+
+        if ($consultation->locum_doctor_id === null) {
+            $invitation = LocumInvitation::activeFor($locum->id);
+            if ($invitation && $consultation->branch_id === $invitation->branch_id) {
+                // Auto-claim
+                $consultation->update([
+                    'locum_doctor_id' => $locum->id,
+                    'locum_invitation_id' => $invitation->id,
+                ]);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function editConsultation(Consultation $consultation)
     {
         $locum = LocumDoctor::find(session('locum_id'));
-        if ($consultation->locum_doctor_id !== $locum?->id) abort(403);
+        if (!$this->canEditConsultation($consultation, $locum)) abort(403);
         $consultation->load(['patient', 'walkInQueue']);
         return view('locum-portal.consultation-edit', compact('locum', 'consultation'));
     }
@@ -201,7 +226,7 @@ class LocumPortalController extends Controller
     public function updateConsultation(Request $request, Consultation $consultation)
     {
         $locum = LocumDoctor::find(session('locum_id'));
-        if ($consultation->locum_doctor_id !== $locum?->id) abort(403);
+        if (!$this->canEditConsultation($consultation, $locum)) abort(403);
 
         $validated = $request->validate([
             'bp_systolic' => 'nullable|numeric',
@@ -233,7 +258,7 @@ class LocumPortalController extends Controller
     public function completeConsultation(Consultation $consultation)
     {
         $locum = LocumDoctor::find(session('locum_id'));
-        if ($consultation->locum_doctor_id !== $locum?->id) abort(403);
+        if (!$this->canEditConsultation($consultation, $locum)) abort(403);
 
         DB::transaction(function () use ($consultation) {
             $consultation->update(['status' => 'completed', 'completed_at' => now()]);
