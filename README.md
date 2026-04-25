@@ -669,14 +669,28 @@ php artisan pail
 ## Integrations
 
 ### WhatsApp Reminders
-Production-ready. Configure under **Settings → WhatsApp Reminders**. Four providers supported:
 
-- **OnSend.io** (default, recommended for Malaysia) — requires API token. Default endpoint `https://app.onsend.io/api/v1/whatsapp/send`. Override via the "Custom Endpoint URL" field if their docs specify a different path.
-- **Meta WhatsApp Cloud API** (official) — requires Access Token + Phone Number ID
-- **Fonnte** — popular MY/ID provider, requires API token
-- **Wassenger** — alternative provider, requires API token
+The settings page splits WhatsApp into **two separate sections**:
 
-If unconfigured, reminders log a simulated success (safe for development). Phone numbers auto-normalized to Malaysia country code (60). All providers use Bearer-token auth with JSON body.
+#### 1. OnSend.io (dedicated, recommended)
+Has its own card and own settings keys (`onsend_enabled`, `onsend_token`, `onsend_endpoint`). Verified against the actual OnSend.io API:
+
+- **Endpoint:** `POST https://onsend.io/api/v1/send`
+- **Auth:** `Authorization: Bearer {device-token}`
+- **Body:** `{ "phone_number": "60xxxxxxxx", "message": "...", "type": "text" }`
+- **Response:** `{ success, message, message_id }`
+- **Get token:** OnSend dashboard → Devices → Copy Token
+
+Toggle "Enable OnSend.io" + paste your device token. **OnSend takes priority** when enabled, so you don't need to also enable the other-providers section.
+
+#### 2. Other Providers (fallback)
+Used when OnSend is disabled. Three providers in a separate section:
+
+- **Meta WhatsApp Cloud API** (official) — Access Token + Phone Number ID
+- **Fonnte** — popular MY/ID provider
+- **Wassenger** — alternative provider
+
+If neither section is configured, reminders log a simulated success (safe for development). Phone numbers auto-normalized to Malaysia country code (60).
 
 Implementation: `app/Services/WhatsAppService.php`.
 

@@ -10,6 +10,11 @@ class WhatsAppService
 {
     public function isConfigured(): bool
     {
+        // OnSend has its own dedicated settings, takes priority
+        if (Setting::get('onsend_enabled') === '1' && filled(Setting::get('onsend_token'))) {
+            return true;
+        }
+        // Fallback: other providers under the generic WhatsApp section
         return Setting::get('whatsapp_enabled') === '1'
             && filled(Setting::get('whatsapp_provider'))
             && filled(Setting::get('whatsapp_token'));
@@ -25,34 +30,53 @@ class WhatsAppService
             ];
         }
 
+        // OnSend has its own dedicated settings — takes priority when enabled
+        if (Setting::get('onsend_enabled') === '1' && filled(Setting::get('onsend_token'))) {
+            return $this->sendViaOnsend($phone, $message);
+        }
+
         $provider = Setting::get('whatsapp_provider', 'cloud_api');
 
         return match ($provider) {
             'cloud_api' => $this->sendViaCloudApi($phone, $message),
             'fonnte' => $this->sendViaFonnte($phone, $message),
             'wassenger' => $this->sendViaWassenger($phone, $message),
-            'onsend' => $this->sendViaOnsend($phone, $message),
             default => ['success' => false, 'response' => 'Unknown provider: ' . $provider],
         };
     }
 
+    /**
+     * OnSend.io WhatsApp API.
+     * Endpoint: POST https://onsend.io/api/v1/send
+     * Auth: Authorization: Bearer {device-token}
+     * Body: phone_number (with country code), message, type (text/image/video/document)
+     * Response: { success, message, message_id }
+     */
     private function sendViaOnsend(string $phone, string $message): array
     {
-        $token = Setting::get('whatsapp_token');
-        $endpoint = Setting::get('whatsapp_endpoint') ?: 'https://app.onsend.io/api/v1/whatsapp/send';
+        $token = Setting::get('onsend_token');
+        $endpoint = Setting::get('onsend_endpoint') ?: 'https://onsend.io/api/v1/send';
+
+        if (!$token) {
+            return ['success' => false, 'response' => 'OnSend.io token not configured'];
+        }
 
         try {
             $response = Http::withToken($token)
                 ->acceptJson()
                 ->post($endpoint, [
-                    'recipient' => $this->normalizePhone($phone),
+                    'phone_number' => $this->normalizePhone($phone),
                     'message' => $message,
                     'type' => 'text',
                 ]);
 
+            $body = $response->json();
+            $apiSuccess = is_array($body) && ($body['success'] ?? false);
+
             return [
-                'success' => $response->successful(),
-                'response' => $response->body(),
+                'success' => $response->successful() && $apiSuccess,
+                'response' => is_array($body) ? json_encode($body) : $response->body(),
+                'message_id' => $body['message_id'] ?? null,
             ];
         } catch (\Throwable $e) {
             Log::error('OnSend.io API error', ['error' => $e->getMessage()]);

@@ -31,20 +31,47 @@
                             @error('clinic_logo') <br><small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
+                        {{-- ============= ONSEND.IO (DEDICATED SECTION) ============= --}}
+                        <div class="mt-4 p-3" style="background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%);border-radius:12px;border-left:4px solid #10b981">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="card-title mb-1" style="color:#047857;"><i class="mdi mdi-rocket-launch mr-1"></i>OnSend.io <small class="badge badge-success">Recommended</small></h5>
+                                    <p class="small text-muted mb-0">Malaysian WhatsApp gateway. Get your device token at <a href="https://onsend.io" target="_blank">onsend.io</a> dashboard → Devices.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-check mb-3 mt-3">
+                                <input type="checkbox" name="onsend_enabled" value="1" id="os_en" class="form-check-input" {{ ($onsend_enabled ?? '0') === '1' ? 'checked' : '' }}>
+                                <label for="os_en" class="form-check-label font-weight-bold">Enable OnSend.io WhatsApp sending</label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>OnSend Device Token *</label>
+                                <input type="password" name="onsend_token" value="{{ $onsend_token ?? '' }}" class="form-control form-control-sm" placeholder="{{ $onsend_token ? '•••••••• (saved)' : 'Paste your device token' }}" autocomplete="off" />
+                                <small class="text-muted">From your OnSend.io dashboard → Devices → click on your device → Copy Token</small>
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <label>Custom Endpoint <small class="text-muted">(optional — leave blank for default)</small></label>
+                                <input type="url" name="onsend_endpoint" value="{{ $onsend_endpoint ?? '' }}" class="form-control form-control-sm" placeholder="https://onsend.io/api/v1/send" />
+                                <small class="text-muted">Default: <code>https://onsend.io/api/v1/send</code> · POST · Bearer auth · body: <code>phone_number, message, type</code></small>
+                            </div>
+                        </div>
+
+                        {{-- ============= OTHER WHATSAPP PROVIDERS ============= --}}
                         <hr class="my-4">
-                        <h5 class="card-title"><i class="mdi mdi-whatsapp text-success mr-1"></i>WhatsApp Reminders</h5>
-                        <p class="small text-muted">Configure WhatsApp API for sending appointment reminders.</p>
+                        <h5 class="card-title"><i class="mdi mdi-whatsapp text-success mr-1"></i>Other WhatsApp Providers</h5>
+                        <p class="small text-muted">Alternative providers — used when OnSend is disabled.</p>
 
                         <div class="form-check mb-2">
                             <input type="checkbox" name="whatsapp_enabled" value="1" id="wa_en" class="form-check-input" {{ ($whatsapp_enabled ?? '0') === '1' ? 'checked' : '' }}>
-                            <label for="wa_en" class="form-check-label">Enable WhatsApp sending</label>
+                            <label for="wa_en" class="form-check-label">Enable other-provider sending</label>
                         </div>
 
                         <div class="form-group">
                             <label>Provider</label>
                             <select name="whatsapp_provider" class="form-control form-control-sm">
-                                <option value="onsend" {{ ($whatsapp_provider ?? 'onsend') === 'onsend' ? 'selected' : '' }}>OnSend.io (recommended for MY)</option>
-                                <option value="cloud_api" {{ ($whatsapp_provider ?? '') === 'cloud_api' ? 'selected' : '' }}>Meta WhatsApp Cloud API</option>
+                                <option value="cloud_api" {{ ($whatsapp_provider ?? 'cloud_api') === 'cloud_api' ? 'selected' : '' }}>Meta WhatsApp Cloud API</option>
                                 <option value="fonnte" {{ ($whatsapp_provider ?? '') === 'fonnte' ? 'selected' : '' }}>Fonnte</option>
                                 <option value="wassenger" {{ ($whatsapp_provider ?? '') === 'wassenger' ? 'selected' : '' }}>Wassenger</option>
                             </select>
@@ -56,9 +83,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Custom Endpoint URL <small class="text-muted">(optional — overrides default)</small></label>
-                            <input type="url" name="whatsapp_endpoint" value="{{ $whatsapp_endpoint ?? '' }}" class="form-control form-control-sm" placeholder="https://app.onsend.io/api/v1/whatsapp/send" />
-                            <small class="text-muted">Leave blank to use the provider's default endpoint.</small>
+                            <label>Custom Endpoint URL <small class="text-muted">(optional)</small></label>
+                            <input type="url" name="whatsapp_endpoint" value="{{ $whatsapp_endpoint ?? '' }}" class="form-control form-control-sm" placeholder="Provider-specific override" />
                         </div>
 
                         <div class="form-group">

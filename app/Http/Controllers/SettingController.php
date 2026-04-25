@@ -13,9 +13,13 @@ class SettingController extends Controller
         $data = [
             'logo' => Setting::get('clinic_logo'),
             'clinicName' => Setting::get('clinic_name', 'Clinic Management System'),
-            // WhatsApp
+            // OnSend.io (dedicated section)
+            'onsend_enabled' => Setting::get('onsend_enabled', '0'),
+            'onsend_token' => Setting::get('onsend_token'),
+            'onsend_endpoint' => Setting::get('onsend_endpoint'),
+            // WhatsApp other providers
             'whatsapp_enabled' => Setting::get('whatsapp_enabled', '0'),
-            'whatsapp_provider' => Setting::get('whatsapp_provider', 'onsend'),
+            'whatsapp_provider' => Setting::get('whatsapp_provider', 'cloud_api'),
             'whatsapp_token' => Setting::get('whatsapp_token'),
             'whatsapp_phone_id' => Setting::get('whatsapp_phone_id'),
             'whatsapp_endpoint' => Setting::get('whatsapp_endpoint'),
@@ -34,10 +38,12 @@ class SettingController extends Controller
         $request->validate([
             'clinic_name' => 'required|string|max:255',
             'clinic_logo' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
-            'whatsapp_provider' => 'nullable|in:onsend,cloud_api,fonnte,wassenger',
+            'whatsapp_provider' => 'nullable|in:cloud_api,fonnte,wassenger',
             'whatsapp_token' => 'nullable|string|max:500',
             'whatsapp_phone_id' => 'nullable|string|max:100',
             'whatsapp_endpoint' => 'nullable|url|max:500',
+            'onsend_token' => 'nullable|string|max:500',
+            'onsend_endpoint' => 'nullable|url|max:500',
             'billplz_api_key' => 'nullable|string|max:255',
             'billplz_collection_id' => 'nullable|string|max:100',
             'billplz_x_signature' => 'nullable|string|max:255',
@@ -45,9 +51,14 @@ class SettingController extends Controller
 
         Setting::set('clinic_name', $request->clinic_name);
 
-        // WhatsApp settings
+        // OnSend.io settings (dedicated)
+        Setting::set('onsend_enabled', $request->boolean('onsend_enabled') ? '1' : '0');
+        if ($request->filled('onsend_token')) Setting::set('onsend_token', $request->onsend_token);
+        Setting::set('onsend_endpoint', $request->onsend_endpoint);
+
+        // WhatsApp other-provider settings
         Setting::set('whatsapp_enabled', $request->boolean('whatsapp_enabled') ? '1' : '0');
-        Setting::set('whatsapp_provider', $request->whatsapp_provider ?: 'onsend');
+        Setting::set('whatsapp_provider', $request->whatsapp_provider ?: 'cloud_api');
         if ($request->filled('whatsapp_token')) Setting::set('whatsapp_token', $request->whatsapp_token);
         if ($request->filled('whatsapp_phone_id')) Setting::set('whatsapp_phone_id', $request->whatsapp_phone_id);
         Setting::set('whatsapp_endpoint', $request->whatsapp_endpoint);
