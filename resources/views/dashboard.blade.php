@@ -67,7 +67,7 @@
 
     {{-- KPI CARDS Row 1 - Big Gradient --}}
     <div class="row">
-        <div class="col-lg-3 col-md-6 grid-margin stretch-card">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="kpi-card kpi-blue">
                 <div class="kpi-icon"><i class="mdi mdi-account-multiple"></i></div>
                 <div class="kpi-body">
@@ -85,7 +85,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 grid-margin stretch-card">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="kpi-card kpi-cyan">
                 <div class="kpi-icon"><i class="mdi mdi-calendar-check"></i></div>
                 <div class="kpi-body">
@@ -95,7 +95,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 grid-margin stretch-card">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="kpi-card kpi-green">
                 <div class="kpi-icon"><i class="mdi mdi-cash-multiple"></i></div>
                 <div class="kpi-body">
@@ -113,7 +113,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 grid-margin stretch-card">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="kpi-card kpi-purple">
                 <div class="kpi-icon"><i class="mdi mdi-card-account-details"></i></div>
                 <div class="kpi-body">
@@ -127,7 +127,7 @@
 
     {{-- KPI Row 2 - Smaller Tiles --}}
     <div class="row">
-        <div class="col-lg-2 col-md-4 col-6 grid-margin stretch-card">
+        <div class="col-lg-2 col-md-4 col-6 mb-3">
             <a href="{{ route('doctors.index') }}" class="text-decoration-none">
                 <div class="mini-kpi mini-kpi-info">
                     <i class="mdi mdi-stethoscope"></i>
@@ -136,7 +136,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-lg-2 col-md-4 col-6 grid-margin stretch-card">
+        <div class="col-lg-2 col-md-4 col-6 mb-3">
             <a href="{{ route('medicines.index') }}" class="text-decoration-none">
                 <div class="mini-kpi {{ $lowStockMedicines > 0 ? 'mini-kpi-danger' : 'mini-kpi-success' }}">
                     <i class="mdi mdi-pill-off"></i>
@@ -145,7 +145,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-lg-2 col-md-4 col-6 grid-margin stretch-card">
+        <div class="col-lg-2 col-md-4 col-6 mb-3">
             <a href="{{ route('insurance-claims.index') }}" class="text-decoration-none">
                 <div class="mini-kpi mini-kpi-warning">
                     <i class="mdi mdi-shield-check"></i>
@@ -154,7 +154,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-lg-2 col-md-4 col-6 grid-margin stretch-card">
+        <div class="col-lg-2 col-md-4 col-6 mb-3">
             <a href="{{ route('leads.index') }}" class="text-decoration-none">
                 <div class="mini-kpi mini-kpi-pink">
                     <i class="mdi mdi-account-search"></i>
@@ -163,7 +163,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-lg-2 col-md-4 col-6 grid-margin stretch-card">
+        <div class="col-lg-2 col-md-4 col-6 mb-3">
             <a href="{{ route('leads.index') }}" class="text-decoration-none">
                 <div class="mini-kpi mini-kpi-orange">
                     <i class="mdi mdi-bell-ring"></i>
@@ -172,7 +172,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-lg-2 col-md-4 col-6 grid-margin stretch-card">
+        <div class="col-lg-2 col-md-4 col-6 mb-3">
             <a href="{{ route('consultations.index') }}" class="text-decoration-none">
                 <div class="mini-kpi mini-kpi-teal">
                     <i class="mdi mdi-stethoscope"></i>
@@ -185,43 +185,43 @@
 
     {{-- CHARTS Row --}}
     <div class="row">
-        <div class="col-lg-8 grid-margin stretch-card">
+        <div class="col-lg-8 mb-3">
             <div class="card chart-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0"><i class="mdi mdi-chart-line text-success mr-2"></i>Revenue Trend</h4>
                         <small class="text-muted">Last 6 months</small>
                     </div>
-                    <canvas id="revenueChart" height="100"></canvas>
+                    <div class="chart-wrapper"><canvas id="revenueChart"></canvas></div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 grid-margin stretch-card">
+        <div class="col-lg-4 mb-3">
             <div class="card chart-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0"><i class="mdi mdi-chart-donut text-info mr-2"></i>Appointments</h4>
                         <small class="text-muted">This month</small>
                     </div>
-                    <canvas id="appointmentPieChart" height="180"></canvas>
+                    <div class="chart-wrapper"><canvas id="appointmentPieChart"></canvas></div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-lg-7 grid-margin stretch-card">
+        <div class="col-lg-7 mb-3">
             <div class="card chart-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0"><i class="mdi mdi-chart-bar text-primary mr-2"></i>Daily Appointments</h4>
                         <small class="text-muted">Last 7 days</small>
                     </div>
-                    <canvas id="dailyChart" height="120"></canvas>
+                    <div class="chart-wrapper-sm"><canvas id="dailyChart"></canvas></div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-5 grid-margin stretch-card">
+        <div class="col-lg-5 mb-3">
             <div class="card chart-card">
                 <div class="card-body">
                     <h4 class="card-title"><i class="mdi mdi-trophy text-warning mr-2"></i>Top Services</h4>
@@ -254,7 +254,7 @@
 
     {{-- ACTIVITY Row --}}
     <div class="row">
-        <div class="col-lg-6 grid-margin stretch-card">
+        <div class="col-lg-6 mb-3">
             <div class="card chart-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -285,7 +285,7 @@
             </div>
         </div>
 
-        <div class="col-lg-6 grid-margin stretch-card">
+        <div class="col-lg-6 mb-3">
             <div class="card chart-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -408,14 +408,14 @@
         .kpi-card {
             display: flex;
             align-items: center;
-            padding: 22px 20px;
+            padding: 18px 20px;
             border-radius: 16px;
             color: #fff;
             position: relative;
             overflow: hidden;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            min-height: 130px;
+            height: 110px;
         }
         .kpi-card:hover {
             transform: translateY(-3px);
@@ -468,20 +468,24 @@
         .mini-kpi {
             background: #fff;
             border-radius: 12px;
-            padding: 16px;
+            padding: 12px 8px;
             text-align: center;
             border-top: 3px solid;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             transition: all 0.2s ease;
             color: #1f2937;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         .mini-kpi:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
         }
         .mini-kpi i {
-            font-size: 1.6em;
-            margin-bottom: 6px;
+            font-size: 1.4em;
+            margin-bottom: 4px;
             display: block;
         }
         .mini-kpi-num {
@@ -516,10 +520,19 @@
             border: none;
             border-radius: 14px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            height: 100%;
         }
         .chart-card .card-title {
             font-weight: 700;
             font-size: 1em;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 260px;
+        }
+        .chart-wrapper-sm {
+            position: relative;
+            height: 220px;
         }
 
         /* Top services */
@@ -573,6 +586,7 @@
 
     @push('scripts')
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
         // Revenue line chart
         var revenueCtx = document.getElementById('revenueChart').getContext('2d');
         var gradient = revenueCtx.createLinearGradient(0, 0, 0, 300);
@@ -681,6 +695,7 @@
                 tooltips: { backgroundColor: '#1e293b', cornerRadius: 8 }
             }
         });
+    });
     </script>
     @endpush
 </x-app-layout>

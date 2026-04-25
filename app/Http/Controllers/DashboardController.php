@@ -84,17 +84,25 @@ class DashboardController extends Controller
             ->whereNotIn('status', ['success', 'reject', 'duplicate'])
             ->count();
 
-        // Monthly revenue trend (last 6 months)
+        // Monthly revenue trend (last 6 months) — single grouped query
+        $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+        $monthlyRevenueData = Invoice::where('status', 'paid')
+            ->where('created_at', '>=', $sixMonthsAgo)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->select(
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as ym"),
+                DB::raw('SUM(total) as total')
+            )
+            ->groupBy('ym')
+            ->pluck('total', 'ym');
+
         $revenueMonths = collect();
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $q = Invoice::where('status', 'paid')
-                ->whereMonth('created_at', $date->month)
-                ->whereYear('created_at', $date->year);
-            if ($branchId) $q->where('branch_id', $branchId);
+            $key = $date->format('Y-m');
             $revenueMonths->push([
                 'label' => $date->format('M Y'),
-                'total' => $q->sum('total'),
+                'total' => (float) ($monthlyRevenueData[$key] ?? 0),
             ]);
         }
 
@@ -106,14 +114,24 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        // Daily appointments (last 7 days)
+        // Daily appointments (last 7 days) — single grouped query
+        $sevenDaysAgo = now()->subDays(6)->startOfDay();
+        $dailyData = (clone $appointmentQuery)
+            ->where('appointment_date', '>=', $sevenDaysAgo)
+            ->select(
+                DB::raw('DATE(appointment_date) as d'),
+                DB::raw('count(*) as total')
+            )
+            ->groupBy('d')
+            ->pluck('total', 'd');
+
         $dailyAppointments = collect();
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
-            $count = (clone $appointmentQuery)->whereDate('appointment_date', $date)->count();
+            $key = $date->format('Y-m-d');
             $dailyAppointments->push([
                 'label' => $date->format('D'),
-                'count' => $count,
+                'count' => (int) ($dailyData[$key] ?? 0),
             ]);
         }
 
