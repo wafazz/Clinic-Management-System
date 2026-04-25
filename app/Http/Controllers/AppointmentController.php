@@ -35,12 +35,38 @@ class AppointmentController extends Controller
         $branchId = session('current_branch_id');
         $patients = Patient::when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->where('is_active', true)->orderBy('name')->get();
-        $doctors = Doctor::with('user')
+        $doctors = Doctor::with(['user', 'schedules'])
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->where('is_active', true)->get();
 
         $selectedPatient = $request->patient_id;
-        return view('appointments.create', compact('patients', 'doctors', 'selectedPatient'));
+        $selectedDoctor = $request->doctor_id;
+
+        // Build doctor data map for live JS — name, fee, specialization, schedule
+        $doctorMap = $doctors->mapWithKeys(fn($d) => [
+            $d->id => [
+                'name' => $d->user->name,
+                'specialization' => $d->specialization ?? 'General Practice',
+                'fee' => (float) ($d->consultation_fee ?? 0),
+                'mmc' => $d->mmc_number,
+                'schedule' => $d->schedules->mapWithKeys(fn($s) => [
+                    strtolower($s->day_of_week) => substr($s->start_time, 0, 5) . ' - ' . substr($s->end_time, 0, 5),
+                ])->all(),
+            ],
+        ])->all();
+
+        // Patient data for live preview
+        $patientMap = $patients->mapWithKeys(fn($p) => [
+            $p->id => [
+                'name' => $p->name,
+                'patient_id' => $p->patient_id,
+                'phone' => $p->phone,
+                'allergies' => $p->allergies,
+                'age' => $p->date_of_birth ? \Carbon\Carbon::parse($p->date_of_birth)->age : null,
+            ],
+        ])->all();
+
+        return view('appointments.create', compact('patients', 'doctors', 'selectedPatient', 'selectedDoctor', 'doctorMap', 'patientMap'));
     }
 
     public function store(Request $request)
