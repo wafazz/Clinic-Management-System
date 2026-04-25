@@ -104,6 +104,21 @@
     <script src="{{ asset('star-admin/vendors/js/vendor.bundle.addons.js') }}"></script>
     <script src="{{ asset('star-admin/js/shared/off-canvas.js') }}"></script>
     <script src="{{ asset('star-admin/js/shared/misc.js') }}"></script>
+    <script>
+        // Auto-wrap any .table that isn't already inside .table-responsive
+        // so every table in the app gets horizontal scroll on narrow screens
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('table.table').forEach(function (t) {
+                var parent = t.parentElement;
+                if (parent && !parent.classList.contains('table-responsive')) {
+                    var wrap = document.createElement('div');
+                    wrap.className = 'table-responsive';
+                    parent.insertBefore(wrap, t);
+                    wrap.appendChild(t);
+                }
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>
