@@ -71,7 +71,36 @@ class PatientController extends Controller
         $branchId = session('current_branch_id');
         $insurancePanels = \App\Models\InsurancePanel::when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->where('is_active', true)->orderBy('company_name')->get();
-        return view('patients.show', compact('patient', 'insurancePanels'));
+
+        // Stats
+        $totalAppointments = $patient->appointments->count();
+        $completedAppointments = $patient->appointments->where('status', 'completed')->count();
+        $upcomingAppointments = $patient->appointments
+            ->filter(fn($a) => $a->appointment_date >= now()->startOfDay() && !in_array($a->status, ['cancelled','no_show','completed']))
+            ->count();
+        $totalSpend = $patient->invoices->where('status', 'paid')->sum('total');
+        $outstanding = $patient->invoices->whereIn('status', ['pending','partial'])->sum('total');
+        $lastVisit = $patient->appointments
+            ->where('status', 'completed')
+            ->sortByDesc('appointment_date')
+            ->first();
+        $totalConsultations = \App\Models\Consultation::where('patient_id', $patient->id)->count();
+
+        // 12-month trend
+        $monthlyTrend = collect();
+        for ($i = 11; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $count = $patient->appointments
+                ->filter(fn($a) => $a->appointment_date->isSameMonth($month))
+                ->count();
+            $monthlyTrend->push(['label' => $month->format('M'), 'count' => $count]);
+        }
+
+        return view('patients.show', compact(
+            'patient', 'insurancePanels', 'totalAppointments', 'completedAppointments',
+            'upcomingAppointments', 'totalSpend', 'outstanding', 'lastVisit',
+            'totalConsultations', 'monthlyTrend'
+        ));
     }
 
     public function edit(Patient $patient)
