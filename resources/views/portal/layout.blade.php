@@ -118,6 +118,7 @@
                 <a href="{{ route('portal.invoices') }}" class="{{ request()->routeIs('portal.invoices*') ? 'active' : '' }}"><i class="mdi mdi-receipt"></i>Invoices</a>
                 <a href="{{ route('portal.lab-reports') }}" class="{{ request()->routeIs('portal.lab-reports*') ? 'active' : '' }}"><i class="mdi mdi-flask"></i>Lab Reports</a>
                 <a href="{{ route('portal.prescriptions') }}" class="{{ request()->routeIs('portal.prescriptions') ? 'active' : '' }}"><i class="mdi mdi-pill"></i>Prescriptions</a>
+                <a href="{{ route('portal.profile') }}" class="{{ request()->routeIs('portal.profile') ? 'active' : '' }}"><i class="mdi mdi-account-cog"></i>Profile</a>
             </div>
 
             @php $patient = $patient ?? \App\Models\Patient::find(session('portal_patient_id')); @endphp
