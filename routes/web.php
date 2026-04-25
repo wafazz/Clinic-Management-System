@@ -29,6 +29,19 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WalkInQueueController;
 use App\Http\Controllers\ConsultationController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\StockTransferController;
+use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\MembershipTierController;
+use App\Http\Controllers\PatientMembershipController;
+use App\Http\Controllers\ServicePackageController;
+use App\Http\Controllers\PatientSubscriptionController;
+use App\Http\Controllers\TreatmentPlanController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\RosterController;
+use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\LocumPaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -98,6 +111,54 @@ Route::middleware(['auth'])->group(function () {
     // Locum Sessions
     Route::resource('locum-sessions', LocumSessionController::class);
     Route::patch('locum-sessions/{locumSession}/mark-paid', [LocumSessionController::class, 'markPaid'])->name('locum-sessions.mark-paid');
+
+    // Locum Payments (batch)
+    Route::resource('locum-payments', LocumPaymentController::class)->except(['edit', 'update']);
+    Route::patch('locum-payments/{locumPayment}/mark-paid', [LocumPaymentController::class, 'markPaid'])->name('locum-payments.mark-paid');
+
+    // Suppliers
+    Route::resource('suppliers', SupplierController::class)->except('show');
+
+    // Purchase Orders
+    Route::resource('purchase-orders', PurchaseOrderController::class)->except(['edit', 'update']);
+    Route::patch('purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive'])->name('purchase-orders.receive');
+
+    // Stock Transfers
+    Route::resource('stock-transfers', StockTransferController::class)->except(['edit', 'update']);
+    Route::patch('stock-transfers/{stockTransfer}/receive', [StockTransferController::class, 'receive'])->name('stock-transfers.receive');
+
+    // Stock Adjustments
+    Route::resource('stock-adjustments', StockAdjustmentController::class)->except(['edit', 'update', 'destroy']);
+
+    // Membership
+    Route::resource('membership-tiers', MembershipTierController::class)->except('show');
+    Route::resource('patient-memberships', PatientMembershipController::class)->except(['edit', 'update']);
+
+    // Service Packages + Subscriptions
+    Route::resource('service-packages', ServicePackageController::class)->except(['edit', 'update']);
+    Route::resource('patient-subscriptions', PatientSubscriptionController::class)->except(['edit', 'update']);
+
+    // Treatment Plans
+    Route::resource('treatment-plans', TreatmentPlanController::class)->except(['edit', 'update']);
+    Route::patch('treatment-plan-sessions/{session}/complete', [TreatmentPlanController::class, 'completeSession'])->name('treatment-plan-sessions.complete');
+
+    // Sales CRM (Leads)
+    Route::resource('leads', LeadController::class)->except(['edit', 'update']);
+    Route::patch('leads/{lead}/status', [LeadController::class, 'updateStatus'])->name('leads.update-status');
+    Route::post('leads/{lead}/convert', [LeadController::class, 'convert'])->name('leads.convert');
+
+    // Staff Roster
+    Route::get('roster', [RosterController::class, 'index'])->name('roster.index');
+    Route::post('roster/shifts', [RosterController::class, 'storeShift'])->name('roster.shifts.store');
+    Route::delete('roster/shifts/{shift}', [RosterController::class, 'destroyShift'])->name('roster.shifts.destroy');
+    Route::get('roster/leaves', [RosterController::class, 'leaves'])->name('roster.leaves');
+    Route::post('roster/leaves', [RosterController::class, 'storeLeave'])->name('roster.leaves.store');
+    Route::patch('roster/leaves/{leave}/approve', [RosterController::class, 'approveLeave'])->name('roster.leaves.approve');
+    Route::patch('roster/leaves/{leave}/reject', [RosterController::class, 'rejectLeave'])->name('roster.leaves.reject');
+
+    // Referrals
+    Route::resource('referrals', ReferralController::class)->except(['edit', 'update']);
+    Route::patch('referrals/{referral}/status', [ReferralController::class, 'updateStatus'])->name('referrals.update-status');
 
     // Insurance Panels
     Route::resource('insurance-panels', InsurancePanelController::class);

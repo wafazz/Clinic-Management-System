@@ -17,6 +17,9 @@
 - [x] Phase 3: Audit Logs, In-App Notifications, Report CSV Exports
 - [x] Walk-In Queue (Nombor Giliran): queue number, status management, call next, TV display screen, appointment check-in integration
 - [x] Consultation Module: vitals, clinical notes, diagnosis, treatment, MC, follow-up — bridges Queue/Appointment to Invoice
+- [x] Feature Parity Push (from New Clinic Apps): Suppliers, Purchase Orders, Stock Transfers, Stock Adjustments, Membership Tiers + Patient Memberships + Family Members + Usage Logs, Service Packages + Subscriptions + Payments + Usages, Treatment Plans + Templates + Sessions, Sales CRM (Leads), Staff Roster + Leave Requests + Shift Swaps, Schedule Overrides, Referrals, Locum Payments
+- [x] DomPDF installed (barryvdh/laravel-dompdf ^3.1)
+- [x] Extended user roles: super_admin, nurse, pharmacist, sales_team, locum_doctor
 
 ## Working Memory
 ### Active Context
@@ -26,7 +29,7 @@
 - **Admin Login**: admin@clinic.com / password
 - **Patient Portal Login**: IC: 900101-01-1234 / password: patient123 (at /portal/login)
 - **Template**: Star Admin Free — assets in `public/star-admin/`, no Vite/Tailwind needed
-- **37 migrations**, **29 models**, **23 controllers**, **95+ Blade views**
+- **46 migrations**, **56 models**, **36 controllers**, **130+ Blade views**
 - Alpine.js preserved for dynamic forms (invoice items, prescriptions, claims)
 
 ### Decisions Made

@@ -67,6 +67,43 @@
             </a>
         </li>
 
+        <li class="nav-item nav-category">Sales & Membership</li>
+
+        <li class="nav-item {{ request()->routeIs('leads.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('leads.index') }}">
+                <i class="menu-icon mdi mdi-account-search"></i>
+                <span class="menu-title">Leads (CRM)</span>
+            </a>
+        </li>
+
+        <li class="nav-item {{ request()->routeIs('membership-tiers.*') || request()->routeIs('patient-memberships.*') ? 'active' : '' }}">
+            <a class="nav-link" data-toggle="collapse" href="#membership-menu" aria-expanded="{{ request()->routeIs('membership-tiers.*') || request()->routeIs('patient-memberships.*') ? 'true' : 'false' }}">
+                <i class="menu-icon mdi mdi-card-account-details"></i>
+                <span class="menu-title">Membership</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse {{ request()->routeIs('membership-tiers.*') || request()->routeIs('patient-memberships.*') ? 'show' : '' }}" id="membership-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"><a class="nav-link" href="{{ route('membership-tiers.index') }}"><i class="mdi mdi-tag mr-2"></i>Tiers</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('patient-memberships.index') }}"><i class="mdi mdi-account-multiple mr-2"></i>Patient Memberships</a></li>
+                </ul>
+            </div>
+        </li>
+
+        <li class="nav-item {{ request()->routeIs('service-packages.*') || request()->routeIs('patient-subscriptions.*') ? 'active' : '' }}">
+            <a class="nav-link" data-toggle="collapse" href="#package-menu" aria-expanded="{{ request()->routeIs('service-packages.*') || request()->routeIs('patient-subscriptions.*') ? 'true' : 'false' }}">
+                <i class="menu-icon mdi mdi-package-variant"></i>
+                <span class="menu-title">Packages</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse {{ request()->routeIs('service-packages.*') || request()->routeIs('patient-subscriptions.*') ? 'show' : '' }}" id="package-menu">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"><a class="nav-link" href="{{ route('service-packages.index') }}"><i class="mdi mdi-package mr-2"></i>Service Packages</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('patient-subscriptions.index') }}"><i class="mdi mdi-credit-card mr-2"></i>Subscriptions</a></li>
+                </ul>
+            </div>
+        </li>
+
         <li class="nav-item nav-category">Billing & Services</li>
 
         <li class="nav-item {{ request()->routeIs('services.*') ? 'active' : '' }}">
@@ -110,17 +147,35 @@
             </a>
         </li>
 
-        <li class="nav-item {{ request()->routeIs('medicines.*') || request()->routeIs('pharmacy-categories.*') || request()->routeIs('prescriptions.*') ? 'active' : '' }}">
+        <li class="nav-item {{ request()->routeIs('treatment-plans.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('treatment-plans.index') }}">
+                <i class="menu-icon mdi mdi-clipboard-list"></i>
+                <span class="menu-title">Treatment Plans</span>
+            </a>
+        </li>
+
+        <li class="nav-item {{ request()->routeIs('referrals.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('referrals.index') }}">
+                <i class="menu-icon mdi mdi-share"></i>
+                <span class="menu-title">Referrals</span>
+            </a>
+        </li>
+
+        <li class="nav-item {{ request()->routeIs('medicines.*') || request()->routeIs('pharmacy-categories.*') || request()->routeIs('prescriptions.*') || request()->routeIs('suppliers.*') || request()->routeIs('purchase-orders.*') || request()->routeIs('stock-transfers.*') || request()->routeIs('stock-adjustments.*') ? 'active' : '' }}">
             <a class="nav-link" data-toggle="collapse" href="#pharmacy-menu" aria-expanded="{{ request()->routeIs('medicines.*') || request()->routeIs('pharmacy-categories.*') || request()->routeIs('prescriptions.*') ? 'true' : 'false' }}">
                 <i class="menu-icon mdi mdi-pill"></i>
                 <span class="menu-title">Pharmacy</span>
                 <i class="menu-arrow"></i>
             </a>
-            <div class="collapse {{ request()->routeIs('medicines.*') || request()->routeIs('pharmacy-categories.*') || request()->routeIs('prescriptions.*') ? 'show' : '' }}" id="pharmacy-menu">
+            <div class="collapse {{ request()->routeIs('medicines.*') || request()->routeIs('pharmacy-categories.*') || request()->routeIs('prescriptions.*') || request()->routeIs('suppliers.*') || request()->routeIs('purchase-orders.*') || request()->routeIs('stock-transfers.*') || request()->routeIs('stock-adjustments.*') ? 'show' : '' }}" id="pharmacy-menu">
                 <ul class="nav flex-column sub-menu">
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('medicines.*') ? 'active' : '' }}" href="{{ route('medicines.index') }}"><i class="mdi mdi-pill mr-2"></i>Medicines</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('pharmacy-categories.*') ? 'active' : '' }}" href="{{ route('pharmacy-categories.index') }}"><i class="mdi mdi-folder mr-2"></i>Categories</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('prescriptions.*') ? 'active' : '' }}" href="{{ route('prescriptions.index') }}"><i class="mdi mdi-clipboard-text mr-2"></i>Prescriptions</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}" href="{{ route('suppliers.index') }}"><i class="mdi mdi-truck mr-2"></i>Suppliers</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('purchase-orders.*') ? 'active' : '' }}" href="{{ route('purchase-orders.index') }}"><i class="mdi mdi-cart mr-2"></i>Purchase Orders</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('stock-transfers.*') ? 'active' : '' }}" href="{{ route('stock-transfers.index') }}"><i class="mdi mdi-transit-transfer mr-2"></i>Stock Transfers</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('stock-adjustments.*') ? 'active' : '' }}" href="{{ route('stock-adjustments.index') }}"><i class="mdi mdi-tune mr-2"></i>Stock Adjustments</a></li>
                 </ul>
             </div>
         </li>
@@ -141,18 +196,26 @@
 
         <li class="nav-item nav-category">Others</li>
 
-        <li class="nav-item {{ request()->routeIs('locum-doctors.*') || request()->routeIs('locum-sessions.*') ? 'active' : '' }}">
-            <a class="nav-link" data-toggle="collapse" href="#locum-menu" aria-expanded="{{ request()->routeIs('locum-doctors.*') || request()->routeIs('locum-sessions.*') ? 'true' : 'false' }}">
+        <li class="nav-item {{ request()->routeIs('locum-doctors.*') || request()->routeIs('locum-sessions.*') || request()->routeIs('locum-payments.*') ? 'active' : '' }}">
+            <a class="nav-link" data-toggle="collapse" href="#locum-menu" aria-expanded="{{ request()->routeIs('locum-doctors.*') || request()->routeIs('locum-sessions.*') || request()->routeIs('locum-payments.*') ? 'true' : 'false' }}">
                 <i class="menu-icon mdi mdi-account-switch"></i>
                 <span class="menu-title">Locum</span>
                 <i class="menu-arrow"></i>
             </a>
-            <div class="collapse {{ request()->routeIs('locum-doctors.*') || request()->routeIs('locum-sessions.*') ? 'show' : '' }}" id="locum-menu">
+            <div class="collapse {{ request()->routeIs('locum-doctors.*') || request()->routeIs('locum-sessions.*') || request()->routeIs('locum-payments.*') ? 'show' : '' }}" id="locum-menu">
                 <ul class="nav flex-column sub-menu">
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('locum-doctors.*') ? 'active' : '' }}" href="{{ route('locum-doctors.index') }}"><i class="mdi mdi-account-card-details mr-2"></i>Doctors</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('locum-sessions.*') ? 'active' : '' }}" href="{{ route('locum-sessions.index') }}"><i class="mdi mdi-calendar-check mr-2"></i>Sessions</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('locum-payments.*') ? 'active' : '' }}" href="{{ route('locum-payments.index') }}"><i class="mdi mdi-cash-multiple mr-2"></i>Payments</a></li>
                 </ul>
             </div>
+        </li>
+
+        <li class="nav-item {{ request()->routeIs('roster.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('roster.index') }}">
+                <i class="menu-icon mdi mdi-calendar-multiple"></i>
+                <span class="menu-title">Staff Roster</span>
+            </a>
         </li>
 
         <li class="nav-item {{ request()->routeIs('reminders.*') ? 'active' : '' }}">
