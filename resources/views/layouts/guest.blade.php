@@ -9,14 +9,16 @@
     <link rel="stylesheet" href="{{ asset('star-admin/vendors/css/vendor.bundle.base.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/shared/style.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/demo_1/style.css') }}">
-    <link rel="icon" type="image/png" href="{{ asset('images/clinicQo.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/icon-32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/icon-16.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/favicon.png') }}">
 
     {{-- PWA --}}
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <meta name="theme-color" content="#0ea5e9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="ClinicQo">
-    <link rel="apple-touch-icon" href="{{ asset('images/icon-192.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
 </head>
 <body style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #10b981 100%); min-height:100vh;">
     @php

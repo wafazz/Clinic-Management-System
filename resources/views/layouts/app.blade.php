@@ -11,7 +11,9 @@
     <link rel="stylesheet" href="{{ asset('star-admin/css/shared/style.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/demo_1/style.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/enhanced.css') }}?v={{ @filemtime(public_path('star-admin/css/enhanced.css')) ?: '1' }}">
-    <link rel="shortcut icon" type="image/png" href="{{ asset('images/clinicQo.png') }}" />
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/icon-32.png') }}" />
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/icon-16.png') }}" />
+    <link rel="shortcut icon" href="{{ asset('images/favicon.png') }}" />
 
     {{-- PWA --}}
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
@@ -19,7 +21,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ClinicQo">
-    <link rel="apple-touch-icon" href="{{ asset('images/icon-192.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
     <style>
         .content-wrapper { min-height: calc(100vh - 130px); }
         .badge-status { font-size: 11px; padding: 4px 10px; }
