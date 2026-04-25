@@ -9,7 +9,7 @@ class LocumSession extends Model
 {
     use Auditable;
     protected $fillable = [
-        'locum_doctor_id', 'branch_id', 'session_date',
+        'locum_doctor_id', 'branch_id', 'locum_invitation_id', 'session_date',
         'start_time', 'end_time', 'status', 'total_pay', 'is_paid', 'notes',
     ];
 
