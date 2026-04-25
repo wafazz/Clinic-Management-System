@@ -65,7 +65,21 @@ class LocumSessionController extends Controller
     public function show(LocumSession $locumSession)
     {
         $locumSession->load(['locumDoctor', 'branch']);
-        return view('locum-sessions.show', compact('locumSession'));
+
+        // If linked to an invitation, surface its details + count consultations done
+        $invitation = $locumSession->locum_invitation_id
+            ? \App\Models\LocumInvitation::with('createdBy')->find($locumSession->locum_invitation_id)
+            : null;
+
+        $consultationsCount = 0;
+        $consultations = collect();
+        if ($invitation) {
+            $consultations = \App\Models\Consultation::where('locum_invitation_id', $invitation->id)
+                ->with('patient')->latest()->limit(20)->get();
+            $consultationsCount = \App\Models\Consultation::where('locum_invitation_id', $invitation->id)->count();
+        }
+
+        return view('locum-sessions.show', compact('locumSession', 'invitation', 'consultations', 'consultationsCount'));
     }
 
     public function edit(LocumSession $locumSession)
