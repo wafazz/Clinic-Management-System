@@ -61,6 +61,7 @@
     </div>
 
     @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
     function walkInForm() {
         return {
@@ -70,8 +71,10 @@
             fillPatient() {
                 if (this.patientId) {
                     let option = document.querySelector(`select[name="patient_id"] option[value="${this.patientId}"]`);
-                    this.patientName = option.dataset.name || '';
-                    this.patientPhone = option.dataset.phone || '';
+                    if (option) {
+                        this.patientName = option.dataset.name || '';
+                        this.patientPhone = option.dataset.phone || '';
+                    }
                 } else {
                     this.patientName = '';
                     this.patientPhone = '';
