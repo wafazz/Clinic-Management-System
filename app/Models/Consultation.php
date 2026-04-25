@@ -13,6 +13,7 @@ class Consultation extends Model
     protected $fillable = [
         'consultation_number', 'branch_id', 'patient_id', 'doctor_id',
         'appointment_id', 'walk_in_queue_id',
+        'locum_doctor_id', 'locum_invitation_id',
         'bp_systolic', 'bp_diastolic', 'pulse', 'temperature',
         'weight_kg', 'height_cm', 'bmi', 'spo2', 'respiratory_rate',
         'chief_complaint', 'history', 'examination', 'diagnosis',
