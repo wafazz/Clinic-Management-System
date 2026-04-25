@@ -105,8 +105,36 @@ class LocumPortalController extends Controller
         if (!$locum || $invitation->locum_doctor_id !== $locum->id) abort(403);
         if ($invitation->status !== 'pending') return back()->with('error', 'Invitation no longer pending.');
 
-        $invitation->update(['status' => 'accepted', 'accepted_at' => now()]);
-        return back()->with('success', 'Invitation accepted. You can now access consultations during the period.');
+        DB::transaction(function () use ($invitation, $locum) {
+            $invitation->update(['status' => 'accepted', 'accepted_at' => now()]);
+
+            // Auto-create LocumSession for payment tracking (idempotent)
+            $existing = LocumSession::where('locum_invitation_id', $invitation->id)->first();
+            if (!$existing) {
+                $hours = $invitation->valid_from->diffInHours($invitation->valid_to, true);
+
+                // Prefer session_rate; fallback to hourly_rate × hours
+                $totalPay = (float) ($locum->session_rate ?: 0);
+                if ($totalPay <= 0 && $locum->hourly_rate) {
+                    $totalPay = (float) $locum->hourly_rate * $hours;
+                }
+
+                LocumSession::create([
+                    'locum_doctor_id' => $locum->id,
+                    'branch_id' => $invitation->branch_id,
+                    'locum_invitation_id' => $invitation->id,
+                    'session_date' => $invitation->valid_from->toDateString(),
+                    'start_time' => $invitation->valid_from->format('H:i'),
+                    'end_time' => $invitation->valid_to->format('H:i'),
+                    'status' => 'scheduled',
+                    'total_pay' => $totalPay,
+                    'is_paid' => false,
+                    'notes' => 'Auto-created from invitation #' . $invitation->id,
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Invitation accepted. A session has been logged for payment tracking. Consultations are now accessible during the period.');
     }
 
     public function declineInvitation(LocumInvitation $invitation)
