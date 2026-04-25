@@ -67,7 +67,7 @@ Built with **Laravel 12 + PHP Blade + Star Admin Bootstrap 4 + Alpine.js**.
 | Layer | Technology |
 |---|---|
 | Framework | Laravel 12 |
-| PHP | 8.2+ |
+| PHP | 8.3+ (tested on 8.4) |
 | Frontend | Blade + Alpine.js |
 | UI Template | Star Admin Free (Bootstrap 4) |
 | Database | MySQL / MariaDB |
@@ -96,7 +96,7 @@ Built with **Laravel 12 + PHP Blade + Star Admin Bootstrap 4 + Alpine.js**.
 
 ## Requirements
 
-- PHP 8.2 or higher
+- PHP 8.3 or higher
 - Composer 2.x
 - Node.js 18+ (only needed if rebuilding Vite assets)
 - MySQL 5.7+ or MariaDB 10.4+
