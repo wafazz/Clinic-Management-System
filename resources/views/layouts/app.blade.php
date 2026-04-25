@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('star-admin/vendors/css/vendor.bundle.addons.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/shared/style.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/demo_1/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('star-admin/css/enhanced.css') }}?v={{ @filemtime(public_path('star-admin/css/enhanced.css')) ?: '1' }}">
     <link rel="shortcut icon" href="{{ asset('star-admin/images/favicon.ico') }}" />
     <style>
         .content-wrapper { min-height: calc(100vh - 130px); }
