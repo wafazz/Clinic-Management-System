@@ -61,53 +61,29 @@ class AppointmentReminderController extends Controller
         return redirect()->route('reminders.index')->with('success', 'Reminder scheduled successfully.');
     }
 
-    public function send(AppointmentReminder $reminder)
+    public function send(AppointmentReminder $reminder, \App\Services\WhatsAppService $whatsapp)
     {
         if ($reminder->status === 'sent') {
             return back()->with('error', 'Reminder already sent.');
         }
 
-        // WhatsApp API integration placeholder
-        // In production, integrate with Twilio/360dialog/Fonnte API here
-        $apiKey = config('services.whatsapp.api_key');
-        $apiUrl = config('services.whatsapp.api_url');
+        $result = $whatsapp->send($reminder->phone_number, $reminder->message);
 
-        if (!$apiKey || !$apiUrl) {
-            // Simulate sending for development
-            $reminder->update([
-                'status' => 'sent',
-                'sent_at' => now(),
-                'response' => 'Simulated: WhatsApp API not configured. Message would be sent to ' . $reminder->phone_number,
-            ]);
+        $reminder->update([
+            'status' => $result['success'] ? 'sent' : 'failed',
+            'sent_at' => $result['success'] ? now() : null,
+            'response' => is_string($result['response']) ? $result['response'] : json_encode($result['response']),
+        ]);
 
-            return back()->with('success', 'Reminder sent (simulated - configure WhatsApp API for real sending).');
+        if (!$result['success']) {
+            return back()->with('error', 'Failed to send: ' . substr((string) ($result['response'] ?? 'unknown error'), 0, 200));
         }
 
-        // Real API call would go here
-        try {
-            $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'Authorization' => $apiKey,
-            ])->post($apiUrl, [
-                'phone' => $reminder->phone_number,
-                'message' => $reminder->message,
-            ]);
+        $msg = !empty($result['simulated'])
+            ? 'Reminder marked sent (WhatsApp not configured — simulated).'
+            : 'Reminder sent via WhatsApp.';
 
-            $reminder->update([
-                'status' => $response->successful() ? 'sent' : 'failed',
-                'sent_at' => $response->successful() ? now() : null,
-                'response' => $response->body(),
-            ]);
-
-            return back()->with($response->successful() ? 'success' : 'error',
-                $response->successful() ? 'Reminder sent successfully.' : 'Failed to send reminder.');
-        } catch (\Exception $e) {
-            $reminder->update([
-                'status' => 'failed',
-                'response' => $e->getMessage(),
-            ]);
-
-            return back()->with('error', 'Failed to send: ' . $e->getMessage());
-        }
+        return back()->with('success', $msg);
     }
 
     public function bulkCreate(Request $request)
