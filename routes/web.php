@@ -153,6 +153,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('patient-subscriptions', PatientSubscriptionController::class)->except(['edit', 'update']);
 
     // Treatment Plans
+    Route::get('treatment-plans/pending-approval', [TreatmentPlanController::class, 'pendingApproval'])->name('treatment-plans.pending-approval');
+    Route::patch('treatment-plans/{treatmentPlan}/approve', [TreatmentPlanController::class, 'approve'])->name('treatment-plans.approve');
+    Route::patch('treatment-plans/{treatmentPlan}/reject', [TreatmentPlanController::class, 'reject'])->name('treatment-plans.reject');
     Route::resource('treatment-plans', TreatmentPlanController::class)->except(['edit', 'update']);
     Route::patch('treatment-plan-sessions/{session}/complete', [TreatmentPlanController::class, 'completeSession'])->name('treatment-plan-sessions.complete');
 

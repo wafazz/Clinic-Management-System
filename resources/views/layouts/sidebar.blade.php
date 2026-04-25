@@ -151,6 +151,10 @@
             <a class="nav-link" href="{{ route('treatment-plans.index') }}">
                 <i class="menu-icon mdi mdi-clipboard-list"></i>
                 <span class="menu-title">Treatment Plans</span>
+                @php $pendingApprovalCount = \App\Models\TreatmentPlan::where('approval_status', 'pending_approval')->when(session('current_branch_id'), fn($q) => $q->where('branch_id', session('current_branch_id')))->count(); @endphp
+                @if($pendingApprovalCount > 0)
+                    <a href="{{ route('treatment-plans.pending-approval') }}" class="badge badge-warning ml-auto" title="Pending approval from locums">{{ $pendingApprovalCount }}</a>
+                @endif
             </a>
         </li>
 

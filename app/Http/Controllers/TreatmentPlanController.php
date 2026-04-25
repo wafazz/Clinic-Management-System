@@ -105,4 +105,43 @@ class TreatmentPlanController extends Controller
         $treatmentPlan->update(['status' => 'cancelled']);
         return redirect()->route('treatment-plans.index')->with('success', 'Plan cancelled.');
     }
+
+    public function pendingApproval()
+    {
+        $branchId = session('current_branch_id');
+        $plans = TreatmentPlan::where('approval_status', 'pending_approval')
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->with(['patient', 'createdByLocum'])
+            ->latest()->paginate(15);
+        return view('treatment-plans.pending-approval', compact('plans'));
+    }
+
+    public function approve(TreatmentPlan $treatmentPlan)
+    {
+        if ($treatmentPlan->approval_status !== 'pending_approval') {
+            return back()->with('error', 'This plan is not pending approval.');
+        }
+        $treatmentPlan->update([
+            'approval_status' => 'approved',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+        ]);
+        return back()->with('success', 'Treatment plan approved.');
+    }
+
+    public function reject(\Illuminate\Http\Request $request, TreatmentPlan $treatmentPlan)
+    {
+        $request->validate(['rejection_reason' => 'required|string|max:500']);
+        if ($treatmentPlan->approval_status !== 'pending_approval') {
+            return back()->with('error', 'This plan is not pending approval.');
+        }
+        $treatmentPlan->update([
+            'approval_status' => 'rejected',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+            'rejection_reason' => $request->rejection_reason,
+            'status' => 'cancelled',
+        ]);
+        return back()->with('success', 'Treatment plan rejected.');
+    }
 }

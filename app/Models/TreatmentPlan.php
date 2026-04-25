@@ -11,6 +11,7 @@ class TreatmentPlan extends Model
         'plan_number', 'title', 'diagnosis', 'description', 'total_sessions',
         'completed_sessions', 'status', 'start_date', 'expected_end_date',
         'actual_end_date', 'notes',
+        'approval_status', 'created_by_locum_id', 'approved_by', 'approved_at', 'rejection_reason',
     ];
 
     protected $casts = [
@@ -21,6 +22,8 @@ class TreatmentPlan extends Model
 
     public function patient() { return $this->belongsTo(Patient::class); }
     public function doctor() { return $this->belongsTo(Doctor::class); }
+    public function createdByLocum() { return $this->belongsTo(LocumDoctor::class, 'created_by_locum_id'); }
+    public function approver() { return $this->belongsTo(User::class, 'approved_by'); }
     public function branch() { return $this->belongsTo(Branch::class); }
     public function consultation() { return $this->belongsTo(Consultation::class); }
     public function template() { return $this->belongsTo(TreatmentPlanTemplate::class, 'template_id'); }
