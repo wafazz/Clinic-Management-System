@@ -10,9 +10,31 @@ class DoctorScheduleController extends Controller
 {
     public function index(Doctor $doctor)
     {
-        $doctor->load('user');
+        $doctor->load('user', 'branch');
         $schedules = $doctor->schedules()->orderBy('day_of_week')->get();
-        return view('doctor-schedules.index', compact('doctor', 'schedules'));
+
+        // Stats
+        $totalMinutes = 0;
+        $totalSlots = 0;
+        foreach ($schedules as $s) {
+            if (!$s->is_available) continue;
+            $start = strtotime($s->start_time);
+            $end = strtotime($s->end_time);
+            $mins = max(0, ($end - $start) / 60);
+            $totalMinutes += $mins;
+            $totalSlots += $s->slot_duration > 0 ? floor($mins / $s->slot_duration) : 0;
+        }
+        $weeklyHours = round($totalMinutes / 60, 1);
+        $daysConfigured = $schedules->count();
+        $daysOff = 7 - $schedules->where('is_available', true)->count();
+
+        // Schedule keyed by day_of_week for the visual grid
+        $scheduleByDay = $schedules->keyBy('day_of_week');
+
+        return view('doctor-schedules.index', compact(
+            'doctor', 'schedules', 'scheduleByDay',
+            'weeklyHours', 'totalSlots', 'daysConfigured', 'daysOff'
+        ));
     }
 
     public function store(Request $request, Doctor $doctor)
