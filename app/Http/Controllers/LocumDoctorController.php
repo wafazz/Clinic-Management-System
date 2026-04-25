@@ -37,9 +37,11 @@ class LocumDoctorController extends Controller
             'hourly_rate' => 'nullable|numeric|min:0',
             'session_rate' => 'nullable|numeric|min:0',
             'bank_details' => 'nullable|string',
+            'password' => 'nullable|string|min:8',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
+        if (empty($validated['password'])) unset($validated['password']);
         LocumDoctor::create($validated);
 
         return redirect()->route('locum-doctors.index')->with('success', 'Locum doctor added.');
@@ -69,9 +71,11 @@ class LocumDoctorController extends Controller
             'hourly_rate' => 'nullable|numeric|min:0',
             'session_rate' => 'nullable|numeric|min:0',
             'bank_details' => 'nullable|string',
+            'password' => 'nullable|string|min:8',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');
+        if (empty($validated['password'])) unset($validated['password']);
         $locumDoctor->update($validated);
 
         return redirect()->route('locum-doctors.index')->with('success', 'Locum doctor updated.');
