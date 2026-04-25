@@ -208,6 +208,10 @@
         </form>
     </div>
 
+    @php
+        $openingDefault = $branch->opening_time ? substr($branch->opening_time, 0, 5) : '';
+        $closingDefault = $branch->closing_time ? substr($branch->closing_time, 0, 5) : '';
+    @endphp
     <script>
         function branchForm() {
             return {
@@ -216,8 +220,8 @@
                 address: @json(old('address', $branch->address)),
                 phone: @json(old('phone', $branch->phone)),
                 email: @json(old('email', $branch->email)),
-                opening: @json(old('opening_time', $branch->opening_time ? substr($branch->opening_time, 0, 5) : '')),
-                closing: @json(old('closing_time', $branch->closing_time ? substr($branch->closing_time, 0, 5) : '')),
+                opening: @json(old('opening_time', $openingDefault)),
+                closing: @json(old('closing_time', $closingDefault)),
                 active: {{ old('is_active', $branch->is_active) ? 'true' : 'false' }},
                 original: {},
                 init() {
