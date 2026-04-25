@@ -47,8 +47,11 @@ use App\Http\Controllers\BillplzController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('login');
-});
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return view('landing');
+})->name('landing');
 
 Route::middleware(['auth'])->group(function () {
     // Dashboard
