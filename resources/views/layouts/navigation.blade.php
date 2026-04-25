@@ -22,7 +22,7 @@
     <div class="navbar-menu-wrapper d-flex align-items-center">
         <ul class="navbar-nav">
             <li class="nav-item font-weight-semibold d-none d-lg-block">
-                {{ \App\Models\Setting::get('clinic_name', 'Clinic Management System') }}
+                {{ \App\Models\Setting::get('clinic_name', 'ClinicQo') }}
             </li>
         </ul>
 

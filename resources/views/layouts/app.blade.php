@@ -4,14 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Clinic Management System') }}</title>
+    <title>{{ config('app.name', 'ClinicQo') }}</title>
     <link rel="stylesheet" href="{{ asset('star-admin/vendors/iconfonts/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/vendors/css/vendor.bundle.base.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/vendors/css/vendor.bundle.addons.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/shared/style.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/demo_1/style.css') }}">
     <link rel="stylesheet" href="{{ asset('star-admin/css/enhanced.css') }}?v={{ @filemtime(public_path('star-admin/css/enhanced.css')) ?: '1' }}">
-    <link rel="shortcut icon" href="{{ asset('star-admin/images/favicon.ico') }}" />
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/clinicQo.png') }}" />
     <style>
         .content-wrapper { min-height: calc(100vh - 130px); }
         .badge-status { font-size: 11px; padding: 4px 10px; }
@@ -93,7 +93,7 @@
 
                 <footer class="footer">
                     <div class="d-sm-flex justify-content-center justify-content-sm-between">
-                        <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Clinic Management System &copy; {{ date('Y') }}</span>
+                        <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">ClinicQo &copy; {{ date('Y') }} — Clinic Management System</span>
                     </div>
                 </footer>
             </div>

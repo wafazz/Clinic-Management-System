@@ -12,7 +12,7 @@ class SettingController extends Controller
     {
         $data = [
             'logo' => Setting::get('clinic_logo'),
-            'clinicName' => Setting::get('clinic_name', 'Clinic Management System'),
+            'clinicName' => Setting::get('clinic_name', 'ClinicQo'),
             // OnSend.io (dedicated section)
             'onsend_enabled' => Setting::get('onsend_enabled', '0'),
             'onsend_token' => Setting::get('onsend_token'),
