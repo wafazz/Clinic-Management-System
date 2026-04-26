@@ -25,10 +25,40 @@ class TreatmentPlanController extends Controller
     public function create()
     {
         $branchId = session('current_branch_id');
-        $patients = Patient::where('branch_id', $branchId)->where('is_active', true)->orderBy('name')->get();
-        $doctors = Doctor::where('branch_id', $branchId)->where('is_active', true)->with('user')->get();
+        $patients = Patient::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->where('is_active', true)->orderBy('name')->get();
+        $doctors = Doctor::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->where('is_active', true)->with('user')->get();
         $templates = TreatmentPlanTemplate::where('is_active', true)->orderBy('name')->get();
-        return view('treatment-plans.create', compact('patients', 'doctors', 'templates'));
+
+        $patientMap = $patients->mapWithKeys(fn($p) => [
+            $p->id => [
+                'name' => $p->name,
+                'patient_id' => $p->patient_id,
+                'phone' => $p->phone,
+                'gender' => $p->gender,
+                'allergies' => $p->allergies,
+                'age' => $p->date_of_birth ? \Carbon\Carbon::parse($p->date_of_birth)->age : null,
+            ],
+        ])->all();
+
+        $doctorMap = $doctors->mapWithKeys(fn($d) => [
+            $d->id => [
+                'name' => $d->user->name,
+                'specialization' => $d->specialization ?? 'General Practice',
+            ],
+        ])->all();
+
+        $templateMap = $templates->mapWithKeys(fn($t) => [
+            $t->id => [
+                'name' => $t->name,
+                'total_sessions' => (int) ($t->total_sessions ?? 6),
+                'interval_days' => (int) ($t->interval_days ?? 7),
+                'description' => $t->description,
+            ],
+        ])->all();
+
+        return view('treatment-plans.create', compact('patients', 'doctors', 'templates', 'patientMap', 'doctorMap', 'templateMap'));
     }
 
     public function store(Request $request)

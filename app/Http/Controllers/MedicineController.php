@@ -39,7 +39,8 @@ class MedicineController extends Controller
     public function create()
     {
         $branchId = session('current_branch_id');
-        $categories = PharmacyCategory::where('branch_id', $branchId)->where('is_active', true)->orderBy('name')->get();
+        $categories = PharmacyCategory::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->where('is_active', true)->orderBy('name')->get();
         return view('pharmacy.medicines.create', compact('categories'));
     }
 

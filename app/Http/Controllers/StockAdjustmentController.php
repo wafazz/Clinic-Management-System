@@ -25,7 +25,8 @@ class StockAdjustmentController extends Controller
     public function create()
     {
         $branchId = session('current_branch_id');
-        $medicines = Medicine::where('branch_id', $branchId)->where('is_active', true)->orderBy('name')->get();
+        $medicines = Medicine::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->where('is_active', true)->orderBy('name')->get();
         return view('stock-adjustments.create', compact('medicines'));
     }
 
