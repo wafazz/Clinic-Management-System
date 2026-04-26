@@ -100,7 +100,28 @@ class ConsultationController extends Controller
         $doctors = Doctor::when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->where('is_active', true)->with('user')->get();
 
-        return view('consultations.create', compact('patients', 'doctors'));
+        $patientMap = $patients->mapWithKeys(fn($p) => [
+            $p->id => [
+                'name' => $p->name,
+                'patient_id' => $p->patient_id,
+                'phone' => $p->phone,
+                'allergies' => $p->allergies,
+                'gender' => $p->gender,
+                'blood_type' => $p->blood_type,
+                'age' => $p->date_of_birth ? \Carbon\Carbon::parse($p->date_of_birth)->age : null,
+            ],
+        ])->all();
+
+        $doctorMap = $doctors->mapWithKeys(fn($d) => [
+            $d->id => [
+                'name' => $d->user->name,
+                'specialization' => $d->specialization ?? 'General Practice',
+                'fee' => (float) ($d->consultation_fee ?? 0),
+                'mmc' => $d->mmc_number,
+            ],
+        ])->all();
+
+        return view('consultations.create', compact('patients', 'doctors', 'patientMap', 'doctorMap'));
     }
 
     public function edit(Consultation $consultation)
