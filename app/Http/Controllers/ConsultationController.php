@@ -95,8 +95,10 @@ class ConsultationController extends Controller
     public function create(Request $request)
     {
         $branchId = session('current_branch_id');
-        $patients = Patient::where('branch_id', $branchId)->where('is_active', true)->orderBy('name')->get();
-        $doctors = Doctor::where('branch_id', $branchId)->where('is_active', true)->with('user')->get();
+        $patients = Patient::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->where('is_active', true)->orderBy('name')->get();
+        $doctors = Doctor::when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->where('is_active', true)->with('user')->get();
 
         return view('consultations.create', compact('patients', 'doctors'));
     }
